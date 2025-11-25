@@ -60,13 +60,14 @@ function Toolbar({
 
         <div className="toolbar-divider"></div>
 
-        {/* Auto-Scroll Controls */}
-        <div className="toolbar-section autoscroll-section">
+        {/* Auto-Scroll Controls - Disabled in compact mode */}
+        <div className={`toolbar-section autoscroll-section ${isDoubleColumn ? 'disabled' : ''}`}>
           <span className="toolbar-label">Auto-scroll</span>
           <button 
             className={`toolbar-btn ${isAutoScrolling ? 'active' : ''}`}
             onClick={onAutoScrollToggle}
-            title="Toggle auto-scroll (Space)"
+            title={isDoubleColumn ? "Disabled in compact mode" : "Toggle auto-scroll (Space)"}
+            disabled={isDoubleColumn}
           >
             {isAutoScrolling ? '⏸' : '▶'}
           </button>
@@ -78,19 +79,20 @@ function Toolbar({
             onChange={(e) => onAutoScrollSpeedChange(Number(e.target.value))}
             className="speed-slider"
             title="Scroll speed"
+            disabled={isDoubleColumn}
           />
           <span className="speed-display">{autoScrollSpeed}x</span>
         </div>
 
         <div className="toolbar-divider"></div>
 
-        {/* Double Column Toggle */}
+        {/* Compact Mode Toggle */}
         <div className="toolbar-section layout-section">
-          <span className="toolbar-label">Layout</span>
+          <span className="toolbar-label">Compact</span>
           <button 
             className={`toolbar-btn ${isDoubleColumn ? 'active' : ''}`}
             onClick={onDoubleColumnToggle}
-            title="Toggle viewport-fit columns"
+            title="Toggle compact view"
           >
             {isDoubleColumn ? '⬜' : '▭'}
           </button>

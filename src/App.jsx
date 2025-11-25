@@ -1,36 +1,73 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import SongList from './components/SongList';
 import SongEditor from './components/SongEditor';
 import SongViewer from './components/SongViewer';
 import Toolbar from './components/Toolbar';
+import LoginForm from './components/Auth/LoginForm';
+import SignupForm from './components/Auth/SignupForm';
+import VerifyEmailForm from './components/Auth/VerifyEmailForm';
+import ForgotPasswordForm from './components/Auth/ForgotPasswordForm';
 import { transposeSong } from './services/transposer';
 import { useAutoScroll } from './hooks/useAutoScroll';
 import { getAllSongs, getSong, createSong, updateSong, deleteSong } from './services/storage';
 import './App.css';
 
+/**
+ * Protected Route - Requires authentication
+ */
+function ProtectedRoute({ children }) {
+  const { isAuthenticated, isLoading } = useAuth();
+  const location = useLocation();
+
+  if (isLoading) {
+    return <div className="loading">Loading...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  return children;
+}
+
 function App() {
   return (
     <Router>
-      <div className="app">
-        <Routes>
-          <Route path="/" element={<Navigate to="/songs" replace />} />
-          <Route path="/songs" element={<SongsPage />} />
-          <Route path="/song/new" element={<NewSongPage />} />
-          <Route path="/song/edit/:id" element={<EditSongPage />} />
-          <Route path="/song/view/:id" element={<ViewSongPage />} />
-          <Route path="*" element={<Navigate to="/songs" replace />} />
-        </Routes>
-      </div>
+      <AuthProvider>
+        <div className="app">
+          <Routes>
+            {/* Public routes - main app is public! */}
+            <Route path="/" element={<Navigate to="/songs" replace />} />
+            <Route path="/songs" element={<SongsPage />} />
+            <Route path="/song/view/:id" element={<ViewSongPage />} />
+            
+            {/* Auth routes */}
+            <Route path="/login" element={<LoginForm />} />
+            <Route path="/signup" element={<SignupForm />} />
+            <Route path="/verify-email" element={<VerifyEmailForm />} />
+            <Route path="/forgot-password" element={<ForgotPasswordForm />} />
+
+            {/* Protected routes - only creating/editing requires auth */}
+            <Route path="/song/new" element={<ProtectedRoute><NewSongPage /></ProtectedRoute>} />
+            <Route path="/song/edit/:id" element={<ProtectedRoute><EditSongPage /></ProtectedRoute>} />
+            
+            {/* Catch all */}
+            <Route path="*" element={<Navigate to="/songs" replace />} />
+          </Routes>
+        </div>
+      </AuthProvider>
     </Router>
   );
 }
 
 /**
- * Songs Page - Browse and manage songs
+ * Songs Page - Browse and manage songs (PUBLIC)
  */
 function SongsPage() {
   const navigate = useNavigate();
+  const { user, isAuthenticated, signOut } = useAuth();
   const [songs, setSongs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -58,6 +95,11 @@ function SongsPage() {
   };
 
   const handleNewSong = () => {
+    // Require auth to create songs
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: { pathname: '/song/new' } } });
+      return;
+    }
     navigate('/song/new');
   };
 
@@ -69,6 +111,15 @@ function SongsPage() {
     } catch (err) {
       setError('Failed to delete song. Please try again.');
       console.error('Error deleting song:', err);
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigate('/');
+    } catch (err) {
+      console.error('Sign out error:', err);
     }
   };
 
@@ -99,12 +150,32 @@ function SongsPage() {
     <div className="songs-page">
       <header className="app-header">
         <h1>Open Chords</h1>
+        <div className="header-user-info">
+          {isAuthenticated ? (
+            <>
+              <span className="user-email">{user?.email}</span>
+              <button onClick={handleSignOut} className="btn-signout">
+                Sign Out
+              </button>
+            </>
+          ) : (
+            <>
+              <button onClick={() => navigate('/login')} className="btn-signin">
+                Sign In
+              </button>
+              <button onClick={() => navigate('/signup')} className="btn-signup">
+                Sign Up
+              </button>
+            </>
+          )}
+        </div>
       </header>
       <SongList
         songs={songs}
         onSelectSong={handleSelectSong}
         onNewSong={handleNewSong}
         onDeleteSong={handleDeleteSong}
+        currentUserId={user?.userId}
       />
     </div>
   );
@@ -220,10 +291,11 @@ function EditSongPage() {
 }
 
 /**
- * View Song Page - View and transpose a song
+ * View Song Page - View and transpose a song (PUBLIC)
  */
 function ViewSongPage() {
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const [song, setSong] = useState(null);
   const [transposedContent, setTransposedContent] = useState('');
   const [currentTranspose, setCurrentTranspose] = useState(0);
@@ -269,6 +341,16 @@ function ViewSongPage() {
   };
 
   const handleEdit = () => {
+    // Require auth to edit songs
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: { pathname: `/song/edit/${song.id}` } } });
+      return;
+    }
+    // Check if user owns this song
+    if (song.userId && user?.userId !== song.userId) {
+      alert('You can only edit your own songs');
+      return;
+    }
     navigate(`/song/edit/${song.id}`);
   };
 
@@ -340,7 +422,7 @@ function ViewSongPage() {
         onDoubleColumnToggle={() => setIsDoubleColumn(prev => !prev)}
       />
 
-      <div className="view-song-container">
+      <div className={`view-song-container ${isDoubleColumn ? 'compact-mode' : ''}`}>
         <SongViewer
           songText={transposedContent}
           title={song.title}

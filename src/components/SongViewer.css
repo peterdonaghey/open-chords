@@ -7,12 +7,35 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.song-viewer.viewport-fit {
+/* Compact mode - full viewport, grid layout */
+.song-viewer.compact-mode {
   max-width: 100%;
-  height: calc(100vh - 140px); /* Subtract header + toolbar height */
+  width: 100%;
+  height: calc(100vh - 110px);
   overflow: hidden;
   margin: 0;
   border-radius: 0;
+  padding: 1rem 2rem;
+  display: flex;
+  flex-direction: column;
+  box-shadow: none;
+}
+
+.song-viewer.compact-mode .song-header {
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid #eee;
+  flex-shrink: 0;
+}
+
+.song-viewer.compact-mode .song-title {
+  font-size: 1.1rem;
+  margin: 0 0 0.1rem 0;
+}
+
+.song-viewer.compact-mode .song-artist {
+  font-size: 0.85rem;
+  margin: 0;
 }
 
 .song-viewer-empty {
@@ -49,27 +72,22 @@
   overflow-x: auto;
 }
 
-/* Multi-column viewport-fit layout */
-.song-content.multi-column {
-  column-gap: 3rem;
-  column-rule: 1px solid #e0e0e0;
+/* Compact grid layout - horizontal scrolling columns */
+.song-content.compact-grid {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: max-content; /* Fits to actual content width */
   height: 100%;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+  gap: 2.5rem;
+  align-content: start;
+  flex: 1;
+  white-space: pre; /* Prevents wrapping */
 }
 
-.song-content.multi-column .song-line {
-  break-inside: avoid;
-  page-break-inside: avoid;
-}
-
-.song-content.multi-column .section-marker {
-  break-after: avoid;
-  page-break-after: avoid;
-}
-
-.song-content.multi-column .chord-lyric-block {
-  break-inside: avoid;
-  page-break-inside: avoid;
+.song-content.compact-grid * {
+  white-space: pre; /* No wrapping anywhere */
 }
 
 .song-line {
@@ -120,14 +138,18 @@
     font-size: 12px;
   }
 
-  /* Force single column on mobile */
-  .song-content.multi-column {
-    column-count: 1 !important;
-  }
-
-  .song-viewer.viewport-fit {
+  /* Disable compact mode on mobile - normal scrolling */
+  .song-viewer.compact-mode {
     height: auto;
     overflow: visible;
+    padding: 1rem;
+  }
+  
+  .song-content.compact-grid {
+    display: block;
+    height: auto;
+    overflow: visible;
+    white-space: pre-wrap;
   }
 
   .song-title {

@@ -1,13 +1,14 @@
-// API endpoint: GET /api/songs/[id] - Get a specific song
-// API endpoint: PUT /api/songs/[id] - Update a song
-// API endpoint: DELETE /api/songs/[id] - Delete a song
-import { getSong, saveSong, deleteSong } from '../_s3.js';
+// API endpoint: GET /api/songs/[id] - Get a specific song (PUBLIC)
+// API endpoint: PUT /api/songs/[id] - Update a song (AUTH REQUIRED)
+// API endpoint: DELETE /api/songs/[id] - Delete a song (AUTH REQUIRED)
+import { getSong, getSongById, updateSong, deleteSong } from '../_dynamodb.js';
+import { authenticateRequest } from '../_auth.js';
 
 export default async function handler(req, res) {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -21,8 +22,8 @@ export default async function handler(req, res) {
 
   try {
     if (req.method === 'GET') {
-      // Get a specific song
-      const song = await getSong(id);
+      // Get a specific song - PUBLIC, no auth required
+      const song = await getSongById(id);
 
       if (!song) {
         return res.status(404).json({ error: 'Song not found' });
@@ -30,6 +31,9 @@ export default async function handler(req, res) {
 
       return res.status(200).json(song);
     }
+
+    // Auth required for PUT and DELETE
+    const userId = await authenticateRequest(req);
 
     if (req.method === 'PUT') {
       // Update a song
@@ -45,13 +49,24 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Song ID mismatch' });
       }
 
-      const savedSong = await saveSong(song);
-      return res.status(200).json(savedSong);
+      // Verify song belongs to user
+      const existingSong = await getSong(userId, id);
+      if (!existingSong) {
+        return res.status(404).json({ error: 'Song not found or access denied' });
+      }
+
+      const updatedSong = await updateSong(userId, song);
+      return res.status(200).json(updatedSong);
     }
 
     if (req.method === 'DELETE') {
-      // Delete a song
-      await deleteSong(id);
+      // Verify song belongs to user before deleting
+      const existingSong = await getSong(userId, id);
+      if (!existingSong) {
+        return res.status(404).json({ error: 'Song not found or access denied' });
+      }
+
+      await deleteSong(userId, id);
       return res.status(200).json({ success: true, message: 'Song deleted' });
     }
 
@@ -59,6 +74,12 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   } catch (error) {
     console.error('API Error:', error);
+    
+    // Handle authentication errors
+    if (error.message?.includes('authorization') || error.message?.includes('token')) {
+      return res.status(401).json({ error: 'Unauthorized', message: error.message });
+    }
+    
     return res.status(500).json({ error: 'Internal server error', message: error.message });
   }
 }

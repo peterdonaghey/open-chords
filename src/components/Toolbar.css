@@ -179,10 +179,43 @@
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
+.toolbar-section.autoscroll-section.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.toolbar-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.speed-slider:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .toolbar {
-    display: none; /* Hide on mobile as requested */
+    display: flex;
+  }
+  
+  .toolbar-container {
+    padding: 0.75rem 1rem;
+    gap: 1rem;
+  }
+
+  .shortcuts-section {
+    display: none;
+  }
+
+  .speed-slider {
+    width: 80px;
+  }
+  
+  /* Hide compact button on mobile */
+  .layout-section {
+    display: none;
   }
 }
 
@@ -193,7 +226,7 @@
   }
 
   .shortcuts-section {
-    display: none; /* Hide keyboard shortcuts on tablets */
+    display: none;
   }
 
   .speed-slider {
@@ -203,7 +236,7 @@
 
 @media (max-width: 900px) {
   .toolbar-label {
-    display: none; /* Hide labels on smaller screens */
+    display: none;
   }
 }
 

@@ -27,9 +27,12 @@ export function useAutoScroll(enabled = false, speed = 3) {
 
       const elapsed = timestamp - lastTimeRef.current;
       
-      // Much slower scroll speeds with better tapering
-      // Speed 1 = 0.1x, Speed 10 = 3x (logarithmic scale)
-      const speedMultiplier = speed === 1 ? 0.1 : Math.pow(speed / 3, 1.5);
+      // Simple linear progression - very slow to moderate
+      // Speed 1: 0.15 pixels/frame = ~9px/sec (very slow but visible)
+      // Speed 10: 1.5 pixels/frame = ~90px/sec (comfortable reading)
+      const baseSpeed = 0.15;
+      const increment = 0.15;
+      const speedMultiplier = baseSpeed + (speed - 1) * increment;
       const scrollAmount = speedMultiplier * (elapsed / 16.67); // Normalized to 60fps
       
       window.scrollBy(0, scrollAmount);
