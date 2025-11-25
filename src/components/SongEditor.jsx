@@ -37,6 +37,7 @@ function SongEditor({ song, onSave, onCancel }) {
           type="button"
           className="preview-toggle"
           onClick={() => setShowPreview(!showPreview)}
+          disabled={!content.trim()}
         >
           {showPreview ? 'Edit' : 'Preview'}
         </button>
