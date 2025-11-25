@@ -13,113 +13,15 @@ function App() {
     <Router>
       <div className="app">
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          <Route path="/" element={<Navigate to="/songs" replace />} />
           <Route path="/songs" element={<SongsPage />} />
           <Route path="/song/new" element={<NewSongPage />} />
           <Route path="/song/edit/:id" element={<EditSongPage />} />
           <Route path="/song/view/:id" element={<ViewSongPage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/songs" replace />} />
         </Routes>
       </div>
     </Router>
-  );
-}
-
-/**
- * Home Page - Landing page with setup
- */
-function HomePage() {
-  const navigate = useNavigate();
-  const [useLocalStorage, setUseLocalStorage] = useState(true);
-
-  useEffect(() => {
-    // Check if user has songs in localStorage
-    const savedSongs = localStorage.getItem('open-chords-songs');
-    if (savedSongs) {
-      // User already has local songs, go to songs page
-      navigate('/songs');
-    }
-  }, [navigate]);
-
-  const handleGetStarted = () => {
-    if (useLocalStorage) {
-      // Initialize with empty songs array
-      localStorage.setItem('open-chords-songs', JSON.stringify([]));
-      navigate('/songs');
-    } else {
-      // TODO: Implement GitHub OAuth flow
-      alert('GitHub integration coming soon! For now, using local storage.');
-      localStorage.setItem('open-chords-songs', JSON.stringify([]));
-      navigate('/songs');
-    }
-  };
-
-  return (
-    <div className="home-page">
-      <div className="home-hero">
-        <h1>Open Chords</h1>
-        <p className="tagline">Your open-source guitar chord sheet manager</p>
-        <p className="description">
-          Create, view, and transpose guitar chord sheets in the classic Ultimate Guitar format.
-          Simple, fast, and completely free.
-        </p>
-
-        <div className="storage-options">
-          <h3>Choose Storage Method:</h3>
-          <label className="storage-option">
-            <input
-              type="radio"
-              name="storage"
-              checked={useLocalStorage}
-              onChange={() => setUseLocalStorage(true)}
-            />
-            <div>
-              <strong>Local Storage</strong>
-              <span>Store songs in your browser (quick start)</span>
-            </div>
-          </label>
-          <label className="storage-option disabled">
-            <input
-              type="radio"
-              name="storage"
-              checked={!useLocalStorage}
-              onChange={() => setUseLocalStorage(false)}
-              disabled
-            />
-            <div>
-              <strong>GitHub Storage</strong>
-              <span>Sync to GitHub repository (coming soon)</span>
-            </div>
-          </label>
-        </div>
-
-        <button className="btn-get-started" onClick={handleGetStarted}>
-          Get Started
-        </button>
-      </div>
-
-      <div className="home-features">
-        <h2>Features</h2>
-        <div className="features-grid">
-          <div className="feature">
-            <h3>📝 Easy Editing</h3>
-            <p>Write chords above lyrics in the familiar Ultimate Guitar format</p>
-          </div>
-          <div className="feature">
-            <h3>🎵 Transpose</h3>
-            <p>Change key instantly with semitone-perfect transposition</p>
-          </div>
-          <div className="feature">
-            <h3>💾 Save & Organize</h3>
-            <p>Manage your personal chord sheet library by artist and title</p>
-          </div>
-          <div className="feature">
-            <h3>📱 Mobile Friendly</h3>
-            <p>Works great on phones, tablets, and desktop</p>
-          </div>
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -195,7 +97,7 @@ function SongsPage() {
   return (
     <div className="songs-page">
       <header className="app-header">
-        <h1 onClick={() => navigate('/')}>Open Chords</h1>
+        <h1>Open Chords</h1>
       </header>
       <SongList
         songs={songs}
