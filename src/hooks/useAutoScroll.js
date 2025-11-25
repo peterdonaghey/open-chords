@@ -30,10 +30,10 @@ export function useAutoScroll(enabled = false, speed = 3) {
       const elapsed = timestamp - lastTimeRef.current;
       
       // Calculate pixels per SECOND, then scale by elapsed time
-      // Speed 1: 20px/sec (very slow but clearly visible)
-      // Speed 5: 100px/sec (comfortable reading pace)
-      // Speed 10: 200px/sec (fast but usable)
-      const pixelsPerSecond = 20 + (speed - 1) * 20;
+      // Speed 1: 10px/sec (very slow but clearly visible)
+      // Speed 5: 50px/sec (comfortable reading pace)
+      // Speed 10: 100px/sec (fast but usable)
+      const pixelsPerSecond = 10 + (speed - 1) * 10;
       
       // Convert to pixels for this frame based on actual elapsed time
       const scrollAmount = pixelsPerSecond * (elapsed / 1000);
