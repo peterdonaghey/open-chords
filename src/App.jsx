@@ -3,8 +3,9 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'r
 import SongList from './components/SongList';
 import SongEditor from './components/SongEditor';
 import SongViewer from './components/SongViewer';
-import Transposer from './components/Transposer';
+import Toolbar from './components/Toolbar';
 import { transposeSong } from './services/transposer';
+import { useAutoScroll } from './hooks/useAutoScroll';
 import { getAllSongs, getSong, createSong, updateSong, deleteSong } from './services/storage';
 import './App.css';
 
@@ -228,6 +229,10 @@ function ViewSongPage() {
   const [currentTranspose, setCurrentTranspose] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [autoScrollSpeed, setAutoScrollSpeed] = useState(3);
+  const [isDoubleColumn, setIsDoubleColumn] = useState(false);
+  
+  const { isScrolling, toggle: toggleAutoScroll } = useAutoScroll(true, autoScrollSpeed);
 
   useEffect(() => {
     loadSong();
@@ -276,10 +281,12 @@ function ViewSongPage() {
     const handleKeyPress = (e) => {
       if (e.key === 'ArrowUp') {
         e.preventDefault();
-        setCurrentTranspose(prev => prev + 1);
+        const newTranspose = currentTranspose + 1;
+        setCurrentTranspose(newTranspose >= 12 ? newTranspose - 12 : newTranspose);
       } else if (e.key === 'ArrowDown') {
         e.preventDefault();
-        setCurrentTranspose(prev => prev - 1);
+        const newTranspose = currentTranspose - 1;
+        setCurrentTranspose(newTranspose <= -12 ? newTranspose + 12 : newTranspose);
       } else if (e.key === '0') {
         e.preventDefault();
         setCurrentTranspose(0);
@@ -288,7 +295,7 @@ function ViewSongPage() {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, []);
+  }, [currentTranspose]);
 
   if (loading) {
     return <div className="loading">Loading...</div>;
@@ -322,16 +329,23 @@ function ViewSongPage() {
         </div>
       </header>
 
+      <Toolbar
+        transpose={currentTranspose}
+        onTranspose={handleTranspose}
+        isAutoScrolling={isScrolling}
+        onAutoScrollToggle={toggleAutoScroll}
+        autoScrollSpeed={autoScrollSpeed}
+        onAutoScrollSpeedChange={setAutoScrollSpeed}
+        isDoubleColumn={isDoubleColumn}
+        onDoubleColumnToggle={() => setIsDoubleColumn(prev => !prev)}
+      />
+
       <div className="view-song-container">
-        <Transposer
-          originalKey={song.key}
-          currentTranspose={currentTranspose}
-          onTranspose={handleTranspose}
-        />
         <SongViewer
           songText={transposedContent}
           title={song.title}
           artist={song.artist}
+          isDoubleColumn={isDoubleColumn}
         />
       </div>
     </div>

@@ -1,0 +1,17 @@
+[
+  {
+    "url": "https://tabs.ultimate-guitar.com/tab/billy-joel/vienna-ukulele-1755704",
+    "error": "list index out of range",
+    "success": false
+  },
+  {
+    "url": "https://tabs.ultimate-guitar.com/tab/eagles/desperado-ukulele-1470078",
+    "error": "list index out of range",
+    "success": false
+  },
+  {
+    "url": "https://tabs.ultimate-guitar.com/tab/mighty-oaks/brother-chords-1475923",
+    "error": "list index out of range",
+    "success": false
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "url": "https://tabs.ultimate-guitar.com/tab/billy-joel/vienna-ukulele-1755704",
+    "title": "Unknown Song",
+    "artist": "Unknown Artist",
+    "tab_type": "chords",
+    "content": "",
+    "content_source": "[data-content]",
+    "content_length": 0,
+    "page_text_length": 125,
+    "has_content": false,
+    "success": true
+  },
+  {
+    "url": "https://tabs.ultimate-guitar.com/tab/eagles/desperado-ukulele-1470078",
+    "title": "Unknown Song",
+    "artist": "Unknown Artist",
+    "tab_type": "chords",
+    "content": "",
+    "content_source": "[data-content]",
+    "content_length": 0,
+    "page_text_length": 124,
+    "has_content": false,
+    "success": true
+  },
+  {
+    "url": "https://tabs.ultimate-guitar.com/tab/mighty-oaks/brother-chords-1475923",
+    "title": "Unknown Song",
+    "artist": "Unknown Artist",
+    "tab_type": "chords",
+    "content": "",
+    "content_source": "[data-content]",
+    "content_length": 0,
+    "page_text_length": 127,
+    "has_content": false,
+    "success": true
+  }
+]

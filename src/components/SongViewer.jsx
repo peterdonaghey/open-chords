@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { parseUGFormat } from '../services/parser';
 import './SongViewer.css';
 
@@ -6,8 +6,10 @@ import './SongViewer.css';
  * SongViewer component - displays a song with chords above lyrics
  * Uses monospace font for proper alignment
  */
-function SongViewer({ songText, title, artist }) {
+function SongViewer({ songText, title, artist, isDoubleColumn = false }) {
   const [parsedLines, setParsedLines] = useState([]);
+  const contentRef = useRef(null);
+  const [columnCount, setColumnCount] = useState(1);
 
   useEffect(() => {
     if (songText) {
@@ -15,6 +17,50 @@ function SongViewer({ songText, title, artist }) {
       setParsedLines(parsed);
     }
   }, [songText]);
+
+  useEffect(() => {
+    if (!isDoubleColumn || !contentRef.current) {
+      setColumnCount(1);
+      return;
+    }
+
+    const calculateColumns = () => {
+      const viewportHeight = window.innerHeight;
+      const toolbarHeight = 60; // Approximate toolbar height
+      const headerHeight = 70; // Approximate header height
+      const padding = 100; // Padding and margins
+      const availableHeight = viewportHeight - toolbarHeight - headerHeight - padding;
+
+      // Get natural content height (single column)
+      const tempDiv = contentRef.current.cloneNode(true);
+      tempDiv.style.position = 'absolute';
+      tempDiv.style.visibility = 'hidden';
+      tempDiv.style.columnCount = '1';
+      tempDiv.style.height = 'auto';
+      document.body.appendChild(tempDiv);
+      const contentHeight = tempDiv.scrollHeight;
+      document.body.removeChild(tempDiv);
+
+      // Calculate number of columns needed
+      const minColumnWidth = 400; // Minimum width to prevent chord wrapping
+      const viewportWidth = window.innerWidth;
+      const maxColumns = Math.floor(viewportWidth / minColumnWidth);
+      
+      // Calculate how many columns we need to fit all content
+      let neededColumns = Math.ceil(contentHeight / availableHeight);
+      
+      // Cap at max columns that can fit
+      neededColumns = Math.min(neededColumns, maxColumns);
+      neededColumns = Math.max(1, neededColumns); // At least 1 column
+
+      setColumnCount(neededColumns);
+    };
+
+    calculateColumns();
+    window.addEventListener('resize', calculateColumns);
+    
+    return () => window.removeEventListener('resize', calculateColumns);
+  }, [isDoubleColumn, parsedLines]);
 
   if (!songText) {
     return (
@@ -25,7 +71,7 @@ function SongViewer({ songText, title, artist }) {
   }
 
   return (
-    <div className="song-viewer">
+    <div className={`song-viewer ${isDoubleColumn ? 'viewport-fit' : ''}`}>
       {(title || artist) && (
         <div className="song-header">
           {title && <h1 className="song-title">{title}</h1>}
@@ -33,7 +79,11 @@ function SongViewer({ songText, title, artist }) {
         </div>
       )}
 
-      <div className="song-content">
+      <div 
+        ref={contentRef}
+        className={`song-content ${isDoubleColumn ? 'multi-column' : ''}`}
+        style={isDoubleColumn ? { columnCount: columnCount } : {}}
+      >
         {parsedLines.map((line, index) => (
           <div key={index} className={`song-line song-line-${line.type}`}>
             {line.type === 'section' && (
