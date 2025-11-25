@@ -1,0 +1,110 @@
+.song-viewer {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.song-viewer-empty {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #999;
+}
+
+.song-header {
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 1rem;
+}
+
+.song-title {
+  margin: 0 0 0.5rem 0;
+  font-size: 2rem;
+  color: #333;
+  font-weight: 600;
+}
+
+.song-artist {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #666;
+  font-weight: 400;
+}
+
+.song-content {
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
+.song-line {
+  margin-bottom: 0.25rem;
+}
+
+.section-marker {
+  font-weight: bold;
+  color: #0066cc;
+  margin: 1.5rem 0 1rem 0;
+  font-size: 1.1em;
+}
+
+.chord-lyric-block {
+  margin-bottom: 0.5rem;
+}
+
+.chord-line {
+  color: #d9534f;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-bottom: -0.2rem;
+}
+
+.lyric-line {
+  color: #333;
+  line-height: 1.4;
+}
+
+.lyric-only {
+  color: #333;
+  margin: 0.25rem 0;
+}
+
+.empty-line {
+  height: 1.4em;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .song-viewer {
+    padding: 1rem;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .song-content {
+    font-size: 12px;
+  }
+
+  .song-title {
+    font-size: 1.5rem;
+  }
+
+  .song-artist {
+    font-size: 1rem;
+  }
+}
+
+@media print {
+  .song-viewer {
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .song-content {
+    font-size: 10pt;
+  }
+}

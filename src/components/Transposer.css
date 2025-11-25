@@ -1,0 +1,198 @@
+.transposer {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.transposer-header {
+  margin-bottom: 1rem;
+}
+
+.transposer-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 1.25rem;
+}
+
+.transposer-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.transpose-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: #0066cc;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  min-width: 100px;
+}
+
+.transpose-btn:hover {
+  background: #0052a3;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 102, 204, 0.3);
+}
+
+.transpose-btn:active {
+  transform: translateY(0);
+}
+
+.btn-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.transpose-info {
+  flex: 1;
+  text-align: center;
+  padding: 0 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.transpose-indicator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.transpose-badge {
+  display: inline-block;
+  padding: 0.5rem 1.5rem;
+  border-radius: 8px;
+  font-size: 2rem;
+  font-weight: 700;
+  font-family: 'Consolas', 'Monaco', monospace;
+  min-width: 80px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s;
+}
+
+.transpose-badge.transpose-up {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+}
+
+.transpose-badge.transpose-down {
+  background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+  color: white;
+}
+
+.transpose-badge.transpose-zero {
+  background: #f8f9fa;
+  color: #999;
+  border: 2px solid #dee2e6;
+}
+
+.key-display {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.25rem;
+}
+
+.original-key {
+  color: #666;
+}
+
+.arrow {
+  margin: 0 0.5rem;
+  color: #999;
+}
+
+.current-key {
+  color: #0066cc;
+}
+
+.no-key {
+  color: #999;
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.transpose-amount {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.reset-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  margin-top: 1rem;
+}
+
+.reset-btn:hover {
+  background: #e9ecef;
+  border-color: #ccc;
+}
+
+.transposer-help {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+}
+
+.transposer-help p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #666;
+  text-align: center;
+}
+
+.transposer-help kbd {
+  display: inline-block;
+  padding: 0.15rem 0.35rem;
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  font-family: monospace;
+  font-size: 0.85em;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .transposer {
+    padding: 1rem;
+  }
+
+  .transposer-controls {
+    flex-direction: column;
+  }
+
+  .transpose-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .transpose-info {
+    order: -1;
+    padding: 1rem 0;
+  }
+
+  .key-display {
+    font-size: 1.25rem;
+  }
+}
