@@ -1,9 +1,9 @@
 // API endpoint: GET /api/songs/[id] - Get a specific song
 // API endpoint: PUT /api/songs/[id] - Update a song
 // API endpoint: DELETE /api/songs/[id] - Delete a song
-import { getSong, saveSong, deleteSong } from '../_s3.js';
+const { getSong, saveSong, deleteSong } = require('../_s3.js');
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, PUT, DELETE, OPTIONS');
