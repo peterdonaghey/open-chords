@@ -23,17 +23,20 @@ export function useAutoScroll(enabled = false, speed = 3) {
     const scroll = (timestamp) => {
       if (!lastTimeRef.current) {
         lastTimeRef.current = timestamp;
+        rafRef.current = requestAnimationFrame(scroll);
+        return; // Skip first frame to establish timing
       }
 
       const elapsed = timestamp - lastTimeRef.current;
       
-      // Simple linear progression - very slow to moderate
-      // Speed 1: 0.15 pixels/frame = ~9px/sec (very slow but visible)
-      // Speed 10: 1.5 pixels/frame = ~90px/sec (comfortable reading)
-      const baseSpeed = 0.15;
-      const increment = 0.15;
-      const speedMultiplier = baseSpeed + (speed - 1) * increment;
-      const scrollAmount = speedMultiplier * (elapsed / 16.67); // Normalized to 60fps
+      // Calculate pixels per SECOND, then scale by elapsed time
+      // Speed 1: 20px/sec (very slow but clearly visible)
+      // Speed 5: 100px/sec (comfortable reading pace)
+      // Speed 10: 200px/sec (fast but usable)
+      const pixelsPerSecond = 20 + (speed - 1) * 20;
+      
+      // Convert to pixels for this frame based on actual elapsed time
+      const scrollAmount = pixelsPerSecond * (elapsed / 1000);
       
       window.scrollBy(0, scrollAmount);
       lastTimeRef.current = timestamp;

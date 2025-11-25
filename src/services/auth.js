@@ -10,11 +10,19 @@ import {
 
 // Cognito User Pool configuration
 const poolData = {
-  UserPoolId: import.meta.env.VITE_COGNITO_USER_POOL_ID,
-  ClientId: import.meta.env.VITE_COGNITO_APP_CLIENT_ID,
+  UserPoolId: import.meta.env.VITE_COGNITO_USER_POOL_ID || '',
+  ClientId: import.meta.env.VITE_COGNITO_APP_CLIENT_ID || '',
 };
 
-const userPool = new CognitoUserPool(poolData);
+// Only create user pool if credentials are available
+let userPool = null;
+if (poolData.UserPoolId && poolData.ClientId) {
+  try {
+    userPool = new CognitoUserPool(poolData);
+  } catch (error) {
+    console.error('Failed to initialize Cognito User Pool:', error);
+  }
+}
 
 /**
  * Sign up a new user
@@ -23,6 +31,10 @@ const userPool = new CognitoUserPool(poolData);
  * @returns {Promise<{user: CognitoUser, userSub: string}>}
  */
 export async function signUp(email, password) {
+  if (!userPool) {
+    throw new Error('Cognito not configured. Please check environment variables.');
+  }
+  
   return new Promise((resolve, reject) => {
     const attributeList = [
       new CognitoUserAttribute({
@@ -51,6 +63,10 @@ export async function signUp(email, password) {
  * @returns {Promise<string>}
  */
 export async function confirmSignUp(email, code) {
+  if (!userPool) {
+    throw new Error('Cognito not configured');
+  }
+  
   return new Promise((resolve, reject) => {
     const userData = {
       Username: email,
@@ -75,6 +91,10 @@ export async function confirmSignUp(email, code) {
  * @returns {Promise<string>}
  */
 export async function resendConfirmationCode(email) {
+  if (!userPool) {
+    throw new Error('Cognito not configured');
+  }
+  
   return new Promise((resolve, reject) => {
     const userData = {
       Username: email,
@@ -100,6 +120,10 @@ export async function resendConfirmationCode(email) {
  * @returns {Promise<{user: CognitoUser, session: CognitoUserSession}>}
  */
 export async function signIn(email, password) {
+  if (!userPool) {
+    throw new Error('Cognito not configured');
+  }
+  
   return new Promise((resolve, reject) => {
     const authenticationDetails = new AuthenticationDetails({
       Username: email,
@@ -132,6 +156,10 @@ export async function signIn(email, password) {
  * @returns {Promise<void>}
  */
 export async function signOut() {
+  if (!userPool) {
+    return;
+  }
+  
   const cognitoUser = userPool.getCurrentUser();
   if (cognitoUser) {
     cognitoUser.signOut();
@@ -143,6 +171,10 @@ export async function signOut() {
  * @returns {Promise<{email: string, userId: string, emailVerified: boolean}>}
  */
 export async function getCurrentUser() {
+  if (!userPool) {
+    throw new Error('Cognito not configured');
+  }
+  
   return new Promise((resolve, reject) => {
     const cognitoUser = userPool.getCurrentUser();
 
@@ -188,6 +220,10 @@ export async function getCurrentUser() {
  * @returns {Promise<string>}
  */
 export async function getIdToken() {
+  if (!userPool) {
+    throw new Error('Cognito not configured');
+  }
+  
   return new Promise((resolve, reject) => {
     const cognitoUser = userPool.getCurrentUser();
 
@@ -231,6 +267,10 @@ export async function isAuthenticated() {
  * @returns {Promise<any>}
  */
 export async function forgotPassword(email) {
+  if (!userPool) {
+    throw new Error('Cognito not configured');
+  }
+  
   return new Promise((resolve, reject) => {
     const userData = {
       Username: email,
@@ -258,6 +298,10 @@ export async function forgotPassword(email) {
  * @returns {Promise<string>}
  */
 export async function confirmPassword(email, code, newPassword) {
+  if (!userPool) {
+    throw new Error('Cognito not configured');
+  }
+  
   return new Promise((resolve, reject) => {
     const userData = {
       Username: email,
@@ -282,6 +326,9 @@ export async function confirmPassword(email, code, newPassword) {
  * @returns {CognitoUserPool}
  */
 export function getUserPool() {
+  if (!userPool) {
+    console.warn('Cognito User Pool not configured. Check environment variables.');
+  }
   return userPool;
 }
 

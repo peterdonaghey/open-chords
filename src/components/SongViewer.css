@@ -83,10 +83,25 @@
   gap: 2.5rem;
   align-content: start;
   flex: 1;
-  white-space: pre; /* Prevents wrapping */
 }
 
-.song-content.compact-grid * {
+.song-column {
+  display: flex;
+  flex-direction: column;
+  white-space: pre; /* Prevents wrapping */
+  height: 100%;
+  overflow: hidden;
+  padding-right: 1.25rem;
+  border-right: 1px solid #e0e0e0;
+}
+
+.song-column:last-child {
+  border-right: none; /* No border on last column */
+}
+
+.song-content.compact-grid .song-line,
+.song-content.compact-grid .chord-line,
+.song-content.compact-grid .lyric-line {
   white-space: pre; /* No wrapping anywhere */
 }
 

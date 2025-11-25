@@ -29,14 +29,31 @@ function SongViewer({ songText, title, artist, isDoubleColumn = false }) {
     const measureHeight = () => {
       if (!contentRef.current) return;
       
-      // Get available height (viewport - header - toolbar - padding)
-      const availableHeight = window.innerHeight - 180; // Adjust based on your header/toolbar height
+      // Get the actual available height of the content container
+      const containerHeight = contentRef.current.clientHeight;
       
-      // Approximate line height (using a reasonable estimate)
-      const lineHeight = 24; // Adjust if needed
+      if (containerHeight < 50) {
+        // Container not rendered yet, try again shortly
+        setTimeout(measureHeight, 50);
+        return;
+      }
       
-      // Calculate how many lines fit per column
-      const linesPerColumn = Math.floor(availableHeight / lineHeight);
+      // Create a temporary element to measure actual line height
+      const tempLine = document.createElement('div');
+      tempLine.className = 'song-line';
+      tempLine.style.visibility = 'hidden';
+      tempLine.style.position = 'absolute';
+      tempLine.innerHTML = '<div class="chord-lyric-block"><div class="chord-line">Em</div><div class="lyric-line">Test line</div></div>';
+      contentRef.current.appendChild(tempLine);
+      
+      const measuredLineHeight = tempLine.offsetHeight;
+      contentRef.current.removeChild(tempLine);
+      
+      // Use measured height, with a small safety margin
+      const lineHeight = measuredLineHeight > 0 ? measuredLineHeight : 24;
+      
+      // Calculate how many lines fit per column (with 10% safety margin)
+      const linesPerColumn = Math.floor((containerHeight * 0.95) / lineHeight);
       
       if (linesPerColumn < 1) return;
       
@@ -49,7 +66,9 @@ function SongViewer({ songText, title, artist, isDoubleColumn = false }) {
       setColumns(cols);
     };
 
-    measureHeight();
+    // Delay initial measurement to ensure DOM is ready
+    setTimeout(measureHeight, 100);
+    
     window.addEventListener('resize', measureHeight);
     return () => window.removeEventListener('resize', measureHeight);
   }, [isDoubleColumn, parsedLines]);
