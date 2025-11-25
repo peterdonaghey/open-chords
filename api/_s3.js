@@ -1,5 +1,5 @@
 // S3 utility functions for Vercel serverless functions
-const { S3Client, ListObjectsV2Command, GetObjectCommand, PutObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
+import { S3Client, ListObjectsV2Command, GetObjectCommand, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 
 // Initialize S3 client
 const s3Client = new S3Client({
@@ -15,7 +15,7 @@ const BUCKET_NAME = 'open-chords-songs';
 /**
  * List all songs from S3
  */
-async function listSongs() {
+export async function listSongs() {
   const command = new ListObjectsV2Command({
     Bucket: BUCKET_NAME,
     Prefix: 'songs/',
@@ -48,7 +48,7 @@ async function listSongs() {
 /**
  * Get a specific song by ID
  */
-async function getSong(id) {
+export async function getSong(id) {
   const command = new GetObjectCommand({
     Bucket: BUCKET_NAME,
     Key: `songs/${id}.json`,
@@ -69,7 +69,7 @@ async function getSong(id) {
 /**
  * Save a song to S3
  */
-async function saveSong(song) {
+export async function saveSong(song) {
   const command = new PutObjectCommand({
     Bucket: BUCKET_NAME,
     Key: `songs/${song.id}.json`,
@@ -84,7 +84,7 @@ async function saveSong(song) {
 /**
  * Delete a song from S3
  */
-async function deleteSong(id) {
+export async function deleteSong(id) {
   const command = new DeleteObjectCommand({
     Bucket: BUCKET_NAME,
     Key: `songs/${id}.json`,
@@ -104,10 +104,3 @@ async function streamToString(stream) {
   }
   return Buffer.concat(chunks).toString('utf-8');
 }
-
-module.exports = {
-  listSongs,
-  getSong,
-  saveSong,
-  deleteSong
-};
