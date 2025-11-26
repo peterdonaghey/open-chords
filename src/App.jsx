@@ -145,7 +145,6 @@ function SongsPage() {
         onSelectSong={handleSelectSong}
         onNewSong={handleNewSong}
         onDeleteSong={handleDeleteSong}
-        currentUserId={user?.userId}
       />
     </div>
   );
