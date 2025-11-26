@@ -51,6 +51,32 @@ export default function VerifyEmailForm() {
     }
   }
 
+  function handlePaste(e) {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text/plain').trim();
+    
+    // Extract only digits from pasted content
+    const digits = pastedData.replace(/\D/g, '').slice(0, 6);
+    
+    if (digits.length === 0) return;
+
+    // Fill in the code array with pasted digits
+    const newCode = [...code];
+    for (let i = 0; i < digits.length; i++) {
+      newCode[i] = digits[i];
+    }
+    setCode(newCode);
+
+    // Focus the next empty field or the last field
+    const nextEmptyIndex = Math.min(digits.length, 5);
+    inputRefs.current[nextEmptyIndex]?.focus();
+
+    // Auto-submit if we have all 6 digits
+    if (digits.length === 6) {
+      handleSubmit(digits);
+    }
+  }
+
   async function handleSubmit(verificationCode = null) {
     const fullCode = verificationCode || code.join('');
     
@@ -118,6 +144,7 @@ export default function VerifyEmailForm() {
               value={digit}
               onChange={(e) => handleCodeChange(index, e.target.value)}
               onKeyDown={(e) => handleKeyDown(index, e)}
+              onPaste={handlePaste}
               disabled={loading || Boolean(success)}
               autoFocus={index === 0}
             />
