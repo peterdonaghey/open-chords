@@ -335,3 +335,45 @@
   background: #e0e0e0 !important;
   color: #333 !important;
 }
+
+/* User Status Display */
+.user-status {
+  padding: 12px 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+.logged-in-as strong {
+  color: #2c3e50;
+}
+
+.anonymous-user {
+  color: #999;
+}
+
+.anonymous-user strong {
+  color: #666;
+}
+
+.inline-login-btn {
+  background: none;
+  border: none;
+  color: #ff6b35;
+  cursor: pointer;
+  font-weight: 600;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.inline-login-btn:hover {
+  color: #e55a2b;
+}
+
+.song-editor-header {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}

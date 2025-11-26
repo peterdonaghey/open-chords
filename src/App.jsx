@@ -9,6 +9,7 @@ import LoginForm from './components/Auth/LoginForm';
 import SignupForm from './components/Auth/SignupForm';
 import VerifyEmailForm from './components/Auth/VerifyEmailForm';
 import ForgotPasswordForm from './components/Auth/ForgotPasswordForm';
+import LoginModal from './components/Auth/LoginModal';
 import { transposeSong } from './services/transposer';
 import { useAutoScroll } from './hooks/useAutoScroll';
 import { getAllSongs, getSong, createSong, updateSong, deleteSong } from './services/storage';
@@ -49,9 +50,9 @@ function App() {
             <Route path="/verify-email" element={<VerifyEmailForm />} />
             <Route path="/forgot-password" element={<ForgotPasswordForm />} />
 
-            {/* Protected routes - only creating/editing requires auth */}
-            <Route path="/song/new" element={<ProtectedRoute><NewSongPage /></ProtectedRoute>} />
-            <Route path="/song/edit/:id" element={<ProtectedRoute><EditSongPage /></ProtectedRoute>} />
+            {/* Song creation/editing - now public with inline login option */}
+            <Route path="/song/new" element={<NewSongPage />} />
+            <Route path="/song/edit/:id" element={<EditSongPage />} />
             
             {/* Catch all */}
             <Route path="*" element={<Navigate to="/songs" replace />} />
@@ -182,12 +183,14 @@ function SongsPage() {
 }
 
 /**
- * New Song Page - Create a new song
+ * New Song Page - Create a new song (PUBLIC - allows anonymous)
  */
 function NewSongPage() {
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   const handleSave = async (songData) => {
     try {
@@ -217,14 +220,16 @@ function NewSongPage() {
 }
 
 /**
- * Edit Song Page - Edit an existing song
+ * Edit Song Page - Edit an existing song (PUBLIC - allows anonymous)
  */
 function EditSongPage() {
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const [song, setSong] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   useEffect(() => {
     loadSong();
@@ -284,8 +289,30 @@ function EditSongPage() {
     <div className="edit-song-page">
       <header className="app-header">
         <h1 onClick={() => navigate('/songs')}>Open Chords</h1>
+        <div className="user-status">
+          {isAuthenticated ? (
+            <span className="logged-in-as">
+              Editing as: <strong>{user?.email}</strong>
+            </span>
+          ) : (
+            <span className="anonymous-user">
+              Editing as: <strong>Anonymous</strong>
+              {' · '}
+              <button onClick={() => setShowLoginModal(true)} className="inline-login-btn">
+                Sign in to claim
+              </button>
+            </span>
+          )}
+        </div>
       </header>
       <SongEditor song={song} onSave={handleSave} onCancel={handleCancel} />
+      <LoginModal 
+        isOpen={showLoginModal} 
+        onClose={() => setShowLoginModal(false)}
+        onSuccess={() => {
+          setShowLoginModal(false);
+        }}
+      />
     </div>
   );
 }

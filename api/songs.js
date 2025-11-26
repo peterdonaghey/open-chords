@@ -21,8 +21,17 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'POST') {
-      // Create a new song - AUTH REQUIRED
-      const userId = await authenticateRequest(req);
+      // Create a new song - AUTH OPTIONAL (allows anonymous)
+      let userId = 'anonymous';
+      
+      try {
+        // Try to authenticate, but allow anonymous if no auth provided
+        userId = await authenticateRequest(req);
+      } catch (error) {
+        // If authentication fails, use anonymous
+        console.log('No authentication provided, creating anonymous song');
+      }
+      
       const song = req.body;
 
       // Validate required fields
