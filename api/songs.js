@@ -39,8 +39,13 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error('API Error:', error);
     
-    // Handle authentication errors
-    if (error.message?.includes('authorization') || error.message?.includes('token')) {
+    // Handle authentication errors (JWT validation, missing auth, etc.)
+    if (error.message?.includes('authorization') || 
+        error.message?.includes('token') || 
+        error.message?.includes('jwt') ||
+        error.message?.includes('No authorization') ||
+        error.name === 'JsonWebTokenError' ||
+        error.name === 'TokenExpiredError') {
       return res.status(401).json({ error: 'Unauthorized', message: error.message });
     }
     
