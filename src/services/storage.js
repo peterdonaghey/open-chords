@@ -74,17 +74,25 @@ export async function getSong(id) {
 }
 
 /**
- * Create a new song (AUTH REQUIRED)
+ * Create a new song (AUTH OPTIONAL - can create anonymously)
  */
 export async function createSong(song) {
   try {
-    const headers = await getAuthHeaders();
+    // Try to get auth headers, but don't fail if user not logged in
+    let headers = { 'Content-Type': 'application/json' };
+    try {
+      const token = await getIdToken();
+      headers['Authorization'] = `Bearer ${token}`;
+    } catch (error) {
+      // No auth token - will create as anonymous
+      console.log('Creating song anonymously (not logged in)');
+    }
+    
     const response = await fetch(`${API_BASE}/songs`, {
       method: 'POST',
       headers,
       body: JSON.stringify(song),
     });
-    handleResponse(response);
     
     if (!response.ok) {
       throw new Error(`Failed to create song: ${response.statusText}`);
