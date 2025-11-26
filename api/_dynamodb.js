@@ -13,7 +13,7 @@ const client = new DynamoDBClient({
 
 const docClient = DynamoDBDocumentClient.from(client);
 
-const TABLE_NAME = process.env.DYNAMODB_TABLE_NAME || 'open-chords-songs';
+const TABLE_NAME = (process.env.DYNAMODB_TABLE_NAME || 'open-chords-songs').trim();
 
 /**
  * List all songs for a user
