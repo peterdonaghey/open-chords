@@ -29,7 +29,11 @@ export default async function handler(req, res) {
         return res.status(404).json({ error: 'Song not found' });
       }
 
-      return res.status(200).json(song);
+      // Transform songId to id for frontend compatibility
+      return res.status(200).json({
+        ...song,
+        id: song.songId,
+      });
     }
 
     // Auth required for PUT and DELETE
@@ -56,7 +60,11 @@ export default async function handler(req, res) {
       }
 
       const updatedSong = await updateSong(userId, song);
-      return res.status(200).json(updatedSong);
+      // Transform songId to id for frontend compatibility
+      return res.status(200).json({
+        ...updatedSong,
+        id: updatedSong.songId,
+      });
     }
 
     if (req.method === 'DELETE') {

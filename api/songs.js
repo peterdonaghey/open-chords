@@ -17,7 +17,12 @@ export default async function handler(req, res) {
     if (req.method === 'GET') {
       // List all songs - PUBLIC, no auth required
       const songs = await listAllSongs();
-      return res.status(200).json(songs);
+      // Transform songId to id for frontend compatibility
+      const transformedSongs = songs.map(song => ({
+        ...song,
+        id: song.songId,
+      }));
+      return res.status(200).json(transformedSongs);
     }
 
     if (req.method === 'POST') {
@@ -40,7 +45,11 @@ export default async function handler(req, res) {
       }
 
       const savedSong = await saveSong(userId, song);
-      return res.status(201).json(savedSong);
+      // Transform songId to id for frontend compatibility
+      return res.status(201).json({
+        ...savedSong,
+        id: savedSong.songId,
+      });
     }
 
     // Method not allowed
