@@ -10,6 +10,7 @@ import SignupForm from './components/Auth/SignupForm';
 import VerifyEmailForm from './components/Auth/VerifyEmailForm';
 import ForgotPasswordForm from './components/Auth/ForgotPasswordForm';
 import LoginModal from './components/Auth/LoginModal';
+import UserMenu from './components/UserMenu';
 import { transposeSong } from './services/transposer';
 import { useAutoScroll } from './hooks/useAutoScroll';
 import { getAllSongs, getSong, createSong, updateSong, deleteSong } from './services/storage';
@@ -68,7 +69,6 @@ function App() {
  */
 function SongsPage() {
   const navigate = useNavigate();
-  const { user, isAuthenticated, signOut } = useAuth();
   const [songs, setSongs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -96,11 +96,7 @@ function SongsPage() {
   };
 
   const handleNewSong = () => {
-    // Require auth to create songs
-    if (!isAuthenticated) {
-      navigate('/login', { state: { from: { pathname: '/song/new' } } });
-      return;
-    }
+    // Anyone can create songs now (no auth required)
     navigate('/song/new');
   };
 
@@ -112,15 +108,6 @@ function SongsPage() {
     } catch (err) {
       setError('Failed to delete song. Please try again.');
       console.error('Error deleting song:', err);
-    }
-  };
-
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      navigate('/');
-    } catch (err) {
-      console.error('Sign out error:', err);
     }
   };
 
@@ -151,25 +138,7 @@ function SongsPage() {
     <div className="songs-page">
       <header className="app-header">
         <h1>Open Chords</h1>
-        <div className="header-user-info">
-          {isAuthenticated ? (
-            <>
-              <span className="user-email">{user?.email}</span>
-              <button onClick={handleSignOut} className="btn-signout">
-                Sign Out
-              </button>
-            </>
-          ) : (
-            <>
-              <button onClick={() => navigate('/login')} className="btn-signin">
-                Sign In
-              </button>
-              <button onClick={() => navigate('/signup')} className="btn-signup">
-                Sign Up
-              </button>
-            </>
-          )}
-        </div>
+        <UserMenu />
       </header>
       <SongList
         songs={songs}

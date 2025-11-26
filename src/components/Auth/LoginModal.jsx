@@ -3,19 +3,15 @@
  */
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import './Auth.css';
+import './LoginModal.css';
 
 export default function LoginModal({ isOpen, onClose, onSuccess }) {
+  const { signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [isSignup, setIsSignup] = useState(false);
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [needsVerification, setNeedsVerification] = useState(false);
-  const [verificationCode, setVerificationCode] = useState('');
-  
-  const { signIn, signUp, confirmSignUp } = useAuth();
+  const [showSignup, setShowSignup] = useState(false);
 
   if (!isOpen) return null;
 
@@ -25,30 +21,13 @@ export default function LoginModal({ isOpen, onClose, onSuccess }) {
     setLoading(true);
 
     try {
-      if (needsVerification) {
-        // Verify email
-        await confirmSignUp(email, verificationCode);
-        await signIn(email, password);
-        if (onSuccess) onSuccess();
-        onClose();
-      } else if (isSignup) {
-        // Sign up
-        if (password !== confirmPassword) {
-          setError('Passwords do not match');
-          setLoading(false);
-          return;
-        }
-        await signUp(email, password);
-        setNeedsVerification(true);
-        setError('');
-      } else {
-        // Sign in
-        await signIn(email, password);
-        if (onSuccess) onSuccess();
-        onClose();
-      }
+      await signIn(email, password);
+      setEmail('');
+      setPassword('');
+      onSuccess?.();
+      onClose();
     } catch (err) {
-      setError(err.message || 'Authentication failed');
+      setError(err.message || 'Failed to sign in');
     } finally {
       setLoading(false);
     }
@@ -63,101 +42,72 @@ export default function LoginModal({ isOpen, onClose, onSuccess }) {
   return (
     <div className="modal-overlay" onClick={handleBackdropClick}>
       <div className="modal-content">
-        <button className="modal-close" onClick={onClose}>&times;</button>
-        
-        <div className="auth-form-container">
-          <h2>{needsVerification ? 'Verify Email' : (isSignup ? 'Create Account' : 'Sign In')}</h2>
-          <p className="auth-subtitle">
-            {needsVerification 
-              ? 'Check your email for the verification code' 
-              : (isSignup ? 'Join to save your chord sheets' : 'Continue as yourself')}
-          </p>
+        <button className="modal-close" onClick={onClose} aria-label="Close">
+          ×
+        </button>
 
+        <div className="modal-header">
+          <h2>Sign in to claim this song</h2>
+          <p>Continue as anonymous or sign in to save under your name</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="modal-form">
           {error && <div className="error-message">{error}</div>}
 
-          <form onSubmit={handleSubmit}>
-            {needsVerification ? (
-              <div className="form-group">
-                <label htmlFor="code">Verification Code</label>
-                <input
-                  type="text"
-                  id="code"
-                  value={verificationCode}
-                  onChange={(e) => setVerificationCode(e.target.value)}
-                  placeholder="Enter 6-digit code"
-                  maxLength="6"
-                  required
-                />
-              </div>
-            ) : (
-              <>
-                <div className="form-group">
-                  <label htmlFor="email">Email</label>
-                  <input
-                    type="email"
-                    id="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
-                    required
-                  />
-                </div>
+          <div className="form-group">
+            <label htmlFor="modal-email">Email</label>
+            <input
+              id="modal-email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              required
+              disabled={loading}
+            />
+          </div>
 
-                <div className="form-group">
-                  <label htmlFor="password">Password</label>
-                  <input
-                    type="password"
-                    id="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder={isSignup ? 'At least 8 characters' : 'Enter your password'}
-                    required
-                  />
-                </div>
+          <div className="form-group">
+            <label htmlFor="modal-password">Password</label>
+            <input
+              id="modal-password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
+              required
+              disabled={loading}
+            />
+          </div>
 
-                {isSignup && (
-                  <div className="form-group">
-                    <label htmlFor="confirmPassword">Confirm Password</label>
-                    <input
-                      type="password"
-                      id="confirmPassword"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="Re-enter your password"
-                      required
-                    />
-                  </div>
-                )}
-              </>
-            )}
-
-            <button type="submit" className="btn-primary" disabled={loading}>
-              {loading ? 'Please wait...' : (needsVerification ? 'Verify' : (isSignup ? 'Create Account' : 'Sign In'))}
+          <div className="modal-actions">
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={onClose}
+              disabled={loading}
+            >
+              Continue as Anonymous
             </button>
-          </form>
+            <button
+              type="submit"
+              className="btn-primary"
+              disabled={loading}
+            >
+              {loading ? 'Signing in...' : 'Sign In'}
+            </button>
+          </div>
 
-          {!needsVerification && (
-            <div className="auth-toggle">
-              {isSignup ? (
-                <p>
-                  Already have an account?{' '}
-                  <button onClick={() => setIsSignup(false)} className="link-button">
-                    Sign in
-                  </button>
-                </p>
-              ) : (
-                <p>
-                  Don't have an account?{' '}
-                  <button onClick={() => setIsSignup(true)} className="link-button">
-                    Sign up
-                  </button>
-                </p>
-              )}
-            </div>
-          )}
-        </div>
+          <div className="modal-footer">
+            <p>
+              Don't have an account?{' '}
+              <a href="/signup" className="link">
+                Sign up
+              </a>
+            </p>
+          </div>
+        </form>
       </div>
     </div>
   );
 }
-

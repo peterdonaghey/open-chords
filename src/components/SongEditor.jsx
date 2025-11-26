@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import LoginModal from './Auth/LoginModal';
 import SongViewer from './SongViewer';
 import './SongEditor.css';
 
@@ -6,12 +8,14 @@ import './SongEditor.css';
  * SongEditor component - create/edit songs with live preview
  */
 function SongEditor({ song, onSave, onCancel }) {
+  const { user, isAuthenticated } = useAuth();
   const [title, setTitle] = useState(song?.title || '');
   const [artist, setArtist] = useState(song?.artist || '');
   const [key, setKey] = useState(song?.key || 'C');
   const [type, setType] = useState(song?.type || 'chords');
   const [content, setContent] = useState(song?.content || '');
   const [showPreview, setShowPreview] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -32,7 +36,26 @@ function SongEditor({ song, onSave, onCancel }) {
   return (
     <div className="song-editor">
       <div className="editor-header">
-        <h2>{song ? 'Edit Song' : 'New Song'}</h2>
+        <div className="editor-title-group">
+          <h2>{song ? 'Edit Song' : 'New Song'}</h2>
+          <div className="editor-user-badge">
+            <span className="user-label">Creating as:</span>
+            {isAuthenticated ? (
+              <span className="user-name authenticated">{user?.email}</span>
+            ) : (
+              <span className="user-name anonymous">
+                Anonymous
+                <button 
+                  type="button"
+                  className="login-link"
+                  onClick={() => setIsLoginModalOpen(true)}
+                >
+                  (Sign in to claim)
+                </button>
+              </span>
+            )}
+          </div>
+        </div>
         <button
           type="button"
           className="preview-toggle"
@@ -152,6 +175,15 @@ function SongEditor({ song, onSave, onCancel }) {
           <SongViewer songText={content} title={title} artist={artist} />
         </div>
       )}
+
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+        onSuccess={() => {
+          setIsLoginModalOpen(false);
+          // User is now logged in, component will re-render
+        }}
+      />
     </div>
   );
 }
