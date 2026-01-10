@@ -10,12 +10,14 @@
   align-items: center;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
-  border-bottom: 2px solid #eee;
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .editor-header h2 {
   margin: 0;
-  color: #333;
+  color: var(--text-primary);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1.5rem;
 }
 
 .editor-title-group {
@@ -32,7 +34,7 @@
 }
 
 .user-label {
-  color: #6b7280;
+  color: var(--text-muted);
   font-weight: 500;
 }
 
@@ -44,17 +46,17 @@
 }
 
 .user-name.authenticated {
-  color: #059669;
+  color: var(--success);
 }
 
 .user-name.anonymous {
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .login-link {
   background: none;
   border: none;
-  color: #3b82f6;
+  color: var(--accent-primary);
   font-size: 13px;
   cursor: pointer;
   text-decoration: underline;
@@ -63,29 +65,31 @@
 }
 
 .login-link:hover {
-  color: #2563eb;
+  color: var(--accent-secondary);
 }
 
 .preview-toggle {
   padding: 0.5rem 1rem;
-  background: #0066cc;
-  color: white;
+  background: var(--accent-primary);
+  color: var(--bg-primary);
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 0.9rem;
-  transition: background 0.2s;
+  font-weight: 600;
+  transition: all 0.2s;
 }
 
 .preview-toggle:hover {
-  background: #0052a3;
+  background: var(--accent-secondary);
 }
 
 .editor-form {
-  background: white;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
   padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
 }
 
 .form-row {
@@ -104,85 +108,100 @@
 .form-group label {
   font-weight: 600;
   margin-bottom: 0.5rem;
-  color: #333;
+  color: var(--text-primary);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  font-size: 0.9rem;
 }
 
 .help-text {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 400;
-  color: #666;
+  color: var(--text-muted);
   font-style: italic;
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
   font-size: 1rem;
-  font-family: inherit;
-  transition: border-color 0.2s;
+  font-family: 'Space Grotesk', sans-serif;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  transition: all 0.2s;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: var(--text-muted);
 }
 
 .form-group textarea {
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-family: 'IBM Plex Mono', monospace;
   resize: vertical;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #0066cc;
-  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(232, 168, 124, 0.15);
 }
 
 .form-actions {
   display: flex;
   gap: 1rem;
   margin-top: 2rem;
-  padding-top: 1rem;
-  border-top: 1px solid #eee;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-subtle);
 }
 
 .btn-primary,
 .btn-secondary {
-  padding: 0.75rem 1.5rem;
+  padding: 0.85rem 1.75rem;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.2s;
-  font-weight: 500;
+  font-weight: 600;
+  font-family: 'Space Grotesk', sans-serif;
 }
 
 .btn-primary {
-  background: #28a745;
-  color: white;
+  background: var(--success);
+  color: var(--bg-primary);
 }
 
 .btn-primary:hover {
-  background: #218838;
+  background: #6aa374;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(124, 182, 134, 0.3);
 }
 
 .btn-secondary {
-  background: #6c757d;
-  color: white;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-medium);
 }
 
 .btn-secondary:hover {
-  background: #5a6268;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-color: var(--accent-primary);
 }
 
 .preview-container {
-  background: white;
-  border-radius: 8px;
-  padding: 1rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 1.5rem;
 }
 
 /* Responsive design */
@@ -192,7 +211,7 @@
   }
 
   .editor-form {
-    padding: 1rem;
+    padding: 1.5rem;
   }
 
   .form-row {

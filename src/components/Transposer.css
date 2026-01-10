@@ -1,8 +1,9 @@
 .transposer {
-  background: white;
-  border-radius: 8px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
   margin-bottom: 2rem;
 }
 
@@ -12,8 +13,11 @@
 
 .transposer-header h3 {
   margin: 0;
-  color: #333;
-  font-size: 1.25rem;
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  font-family: 'IBM Plex Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .transposer-controls {
@@ -28,21 +32,21 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.25rem;
-  background: #0066cc;
-  color: white;
+  background: var(--accent-primary);
+  color: var(--bg-primary);
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: 600;
   transition: all 0.2s;
   min-width: 100px;
 }
 
 .transpose-btn:hover {
-  background: #0052a3;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 102, 204, 0.3);
+  background: var(--accent-secondary);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(232, 168, 124, 0.3);
 }
 
 .transpose-btn:active {
@@ -76,67 +80,69 @@
   border-radius: 8px;
   font-size: 2rem;
   font-weight: 700;
-  font-family: 'Consolas', 'Monaco', monospace;
+  font-family: 'IBM Plex Mono', monospace;
   min-width: 80px;
   text-align: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-md);
   transition: all 0.2s;
 }
 
 .transpose-badge.transpose-up {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-  color: white;
+  background: linear-gradient(135deg, var(--success) 0%, #5fa66a 100%);
+  color: var(--bg-primary);
 }
 
 .transpose-badge.transpose-down {
-  background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
-  color: white;
+  background: linear-gradient(135deg, var(--error) 0%, #c05050 100%);
+  color: var(--bg-primary);
 }
 
 .transpose-badge.transpose-zero {
-  background: #f8f9fa;
-  color: #999;
-  border: 2px solid #dee2e6;
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
+  box-shadow: none;
 }
 
 .key-display {
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   font-weight: 600;
-  color: #333;
+  color: var(--text-primary);
   margin-bottom: 0.25rem;
+  font-family: 'IBM Plex Mono', monospace;
 }
 
 .original-key {
-  color: #666;
+  color: var(--text-muted);
 }
 
 .arrow {
   margin: 0 0.5rem;
-  color: #999;
+  color: var(--text-muted);
 }
 
 .current-key {
-  color: #0066cc;
+  color: var(--accent-primary);
 }
 
 .no-key {
-  color: #999;
+  color: var(--text-muted);
   font-size: 1rem;
   font-weight: 400;
 }
 
 .transpose-amount {
-  font-size: 0.9rem;
-  color: #666;
+  font-size: 0.85rem;
+  color: var(--text-muted);
 }
 
 .reset-btn {
   width: 100%;
   padding: 0.75rem;
-  background: #f8f9fa;
-  color: #333;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
   cursor: pointer;
   font-size: 0.9rem;
   transition: all 0.2s;
@@ -144,32 +150,34 @@
 }
 
 .reset-btn:hover {
-  background: #e9ecef;
-  border-color: #ccc;
+  background: var(--bg-card);
+  border-color: var(--accent-primary);
+  color: var(--text-primary);
 }
 
 .transposer-help {
   margin-top: 1.5rem;
   padding-top: 1rem;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--border-subtle);
 }
 
 .transposer-help p {
   margin: 0;
-  font-size: 0.85rem;
-  color: #666;
+  font-size: 0.8rem;
+  color: var(--text-muted);
   text-align: center;
 }
 
 .transposer-help kbd {
   display: inline-block;
-  padding: 0.15rem 0.35rem;
-  background: #f8f9fa;
-  border: 1px solid #ddd;
-  border-radius: 3px;
-  font-family: monospace;
-  font-size: 0.85em;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  padding: 0.2rem 0.4rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.75em;
+  color: var(--text-secondary);
+  box-shadow: 0 2px 0 var(--border-subtle);
 }
 
 /* Responsive design */
@@ -193,6 +201,6 @@
   }
 
   .key-display {
-    font-size: 1.25rem;
+    font-size: 1.2rem;
   }
 }
