@@ -2,6 +2,7 @@
  * Login Modal - Inline authentication without navigation
  */
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../../context/AuthContext';
 import './LoginModal.css';
 
@@ -39,7 +40,8 @@ export default function LoginModal({ isOpen, onClose, onSuccess }) {
     }
   };
 
-  return (
+  // Render modal at document root using portal to avoid positioning issues
+  return createPortal(
     <div className="modal-overlay" onClick={handleBackdropClick}>
       <div className="modal-content">
         <button className="modal-close" onClick={onClose} aria-label="Close">
@@ -47,8 +49,8 @@ export default function LoginModal({ isOpen, onClose, onSuccess }) {
         </button>
 
         <div className="modal-header">
-          <h2>Sign in to claim this song</h2>
-          <p>Continue as anonymous or sign in to save under your name</p>
+          <h2>Sign in</h2>
+          <p>Continue as anonymous or sign in to save or create songs</p>
         </div>
 
         <form onSubmit={handleSubmit} className="modal-form">
@@ -108,6 +110,7 @@ export default function LoginModal({ isOpen, onClose, onSuccess }) {
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

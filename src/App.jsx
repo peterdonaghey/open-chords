@@ -425,16 +425,23 @@ function ViewSongPage() {
   const [autoScrollSpeed, setAutoScrollSpeed] = useState(3);
   const [isDoubleColumn, setIsDoubleColumn] = useState(false);
   const [isNavVisible, setIsNavVisible] = useState(false);
+  const [hasDropdownOpen, setHasDropdownOpen] = useState(false);
   
   const { isScrolling, toggle: toggleAutoScroll } = useAutoScroll(true, autoScrollSpeed);
 
-  // Mouse tracking for auto-hide navbar
+  // Mouse tracking for auto-hide navbar - but stay visible if dropdown is open
   useEffect(() => {
     let hideTimeout;
     
     const handleMouseMove = (e) => {
-      // Show navbar when mouse is near top
-      if (e.clientY < 80) {
+      // Don't hide if dropdown is open
+      if (hasDropdownOpen) {
+        setIsNavVisible(true);
+        return;
+      }
+      
+      // Show navbar when mouse is near top (expanded area to include dropdowns)
+      if (e.clientY < 400) { // Increased from 80 to account for dropdowns
         setIsNavVisible(true);
         
         // Clear any existing timeout
@@ -442,13 +449,17 @@ function ViewSongPage() {
           clearTimeout(hideTimeout);
         }
         
-        // Hide after 2 seconds of no movement at top
+        // Hide after 3 seconds of no movement at top (increased from 2s)
         hideTimeout = setTimeout(() => {
-          setIsNavVisible(false);
-        }, 2000);
-      } else if (e.clientY > 80) {
+          if (!hasDropdownOpen) { // Double-check dropdown isn't open
+            setIsNavVisible(false);
+          }
+        }, 3000);
+      } else if (e.clientY > 400) {
         // Hide immediately when mouse moves away from top area
-        setIsNavVisible(false);
+        if (!hasDropdownOpen) {
+          setIsNavVisible(false);
+        }
         if (hideTimeout) {
           clearTimeout(hideTimeout);
         }
@@ -463,7 +474,7 @@ function ViewSongPage() {
         clearTimeout(hideTimeout);
       }
     };
-  }, []);
+  }, [hasDropdownOpen]);
 
   useEffect(() => {
     loadSong();
@@ -575,6 +586,7 @@ function ViewSongPage() {
         onDoubleColumnToggle={() => setIsDoubleColumn(prev => !prev)}
         onEdit={handleEdit}
         onBack={handleBack}
+        onDropdownChange={setHasDropdownOpen}
       />
 
       <div className={`view-song-container ${isDoubleColumn ? 'compact-mode' : ''}`}>

@@ -22,6 +22,7 @@ export default function UnifiedNavBar({
   onDoubleColumnToggle,
   onEdit,
   onBack,
+  onDropdownChange, // Callback to notify parent when dropdown state changes
 }) {
   const navigate = useNavigate();
   const [isPinned, setIsPinned] = useState(false);
@@ -118,7 +119,7 @@ export default function UnifiedNavBar({
         </div>
 
         <div className="navbar-section navbar-right">
-          <ThemeSelector />
+          <ThemeSelector onDropdownChange={onDropdownChange} />
           <button className="control-btn action-btn" onClick={onEdit} title="Edit song">
             <span className="btn-icon">✏️</span>
             <span className="btn-label">Edit</span>
@@ -127,7 +128,7 @@ export default function UnifiedNavBar({
             <span className="btn-icon">◀</span>
             <span className="btn-label">Back</span>
           </button>
-          <UserMenu />
+          <UserMenu onDropdownChange={onDropdownChange} />
         </div>
       </nav>
     );
@@ -140,8 +141,8 @@ export default function UnifiedNavBar({
         🎵 Open Chords
       </h1>
       <div className="navbar-section navbar-right">
-        <ThemeSelector />
-        <UserMenu />
+        <ThemeSelector onDropdownChange={onDropdownChange} />
+        <UserMenu onDropdownChange={onDropdownChange} />
       </div>
     </nav>
   );

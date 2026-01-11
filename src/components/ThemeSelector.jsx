@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import './ThemeSelector.css';
 
-export default function ThemeSelector() {
+export default function ThemeSelector({ onDropdownChange }) {
   const { currentTheme, changeTheme, themes } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -19,6 +19,13 @@ export default function ThemeSelector() {
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
   }, [isOpen]);
+
+  // Notify parent when dropdown state changes
+  useEffect(() => {
+    if (onDropdownChange) {
+      onDropdownChange(isOpen);
+    }
+  }, [isOpen, onDropdownChange]);
 
   const handleThemeSelect = (themeKey) => {
     changeTheme(themeKey);

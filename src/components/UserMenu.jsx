@@ -7,7 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import LoginModal from './Auth/LoginModal';
 import './UserMenu.css';
 
-export default function UserMenu() {
+export default function UserMenu({ onDropdownChange }) {
   const { user, isAuthenticated, isAdmin, signOut } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -27,6 +27,13 @@ export default function UserMenu() {
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
   }, [isDropdownOpen]);
+
+  // Notify parent when dropdown state changes
+  useEffect(() => {
+    if (onDropdownChange) {
+      onDropdownChange(isDropdownOpen);
+    }
+  }, [isDropdownOpen, onDropdownChange]);
 
   const handleSignOut = async () => {
     try {

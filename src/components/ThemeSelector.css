@@ -31,7 +31,7 @@
   max-height: 400px;
   overflow-y: auto;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
-  z-index: 2000;
+  z-index: 9999; /* Very high to ensure it's above everything */
   animation: slideDown 0.2s ease;
 }
 

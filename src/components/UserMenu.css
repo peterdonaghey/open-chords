@@ -50,7 +50,7 @@
   box-shadow: var(--shadow-lg);
   min-width: 220px;
   overflow: hidden;
-  z-index: 100;
+  z-index: 9999;
   animation: dropdownSlide 0.2s ease-out;
 }
 
