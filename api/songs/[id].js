@@ -53,13 +53,23 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Song ID mismatch' });
       }
 
-      // Verify song belongs to user
-      const existingSong = await getSong(authResult.userId, id);
+      // Get the existing song to check ownership
+      const existingSong = await getSongById(id);
       if (!existingSong) {
-        return res.status(404).json({ error: 'Song not found or access denied' });
+        return res.status(404).json({ error: 'Song not found' });
       }
 
-      const updatedSong = await updateSong(authResult.userId, song);
+      // Check ownership: either userId matches OR ownerEmail matches
+      const isOwner = 
+        (existingSong.userId === authResult.userId) || 
+        (existingSong.ownerEmail === authResult.email);
+      
+      if (!isOwner && !authResult.isAdmin) {
+        return res.status(403).json({ error: 'You do not have permission to edit this song' });
+      }
+
+      // Update using the song's original userId (for DynamoDB key)
+      const updatedSong = await updateSong(existingSong.userId, song);
       // Transform songId to id for frontend compatibility
       return res.status(200).json({
         ...updatedSong,
