@@ -34,6 +34,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // Check authentication status on mount
   useEffect(() => {
@@ -46,9 +47,12 @@ export function AuthProvider({ children }) {
       const currentUser = await authGetCurrentUser();
       setUser(currentUser);
       setIsAuthenticated(true);
+      // Check if user is admin based on role from database
+      setIsAdmin(currentUser.role === 'admin');
     } catch (error) {
       setUser(null);
       setIsAuthenticated(false);
+      setIsAdmin(false);
     } finally {
       setIsLoading(false);
     }
@@ -111,6 +115,7 @@ export function AuthProvider({ children }) {
       await authSignOut();
       setUser(null);
       setIsAuthenticated(false);
+      setIsAdmin(false);
     } catch (error) {
       throw error;
     }
@@ -143,6 +148,7 @@ export function AuthProvider({ children }) {
   const value = {
     user,
     isAuthenticated,
+    isAdmin,
     isLoading,
     signUp,
     confirmSignUp,

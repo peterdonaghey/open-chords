@@ -8,7 +8,7 @@ import LoginModal from './Auth/LoginModal';
 import './UserMenu.css';
 
 export default function UserMenu() {
-  const { user, isAuthenticated, signOut } = useAuth();
+  const { user, isAuthenticated, isAdmin, signOut } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -73,8 +73,38 @@ export default function UserMenu() {
               <>
                 <div className="user-menu-header">
                   <div className="user-email">{user?.email}</div>
+                  {isAdmin && <div className="admin-badge">Admin</div>}
                 </div>
                 <div className="user-menu-divider"></div>
+                <button
+                  className="user-menu-item"
+                  onClick={() => {
+                    setIsDropdownOpen(false);
+                    navigate('/profile');
+                  }}
+                >
+                  <span>Profile</span>
+                </button>
+                <button
+                  className="user-menu-item"
+                  onClick={() => {
+                    setIsDropdownOpen(false);
+                    navigate('/my-songs');
+                  }}
+                >
+                  <span>My Songs</span>
+                </button>
+                {isAdmin && (
+                  <button
+                    className="user-menu-item admin-menu-item"
+                    onClick={() => {
+                      setIsDropdownOpen(false);
+                      navigate('/admin');
+                    }}
+                  >
+                    <span>⚡ Admin Panel</span>
+                  </button>
+                )}
                 <button
                   className="user-menu-item"
                   onClick={handleSignOut}

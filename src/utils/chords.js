@@ -36,7 +36,8 @@ export function transposeChord(chord, semitones, useFlats = false) {
   }
 
   // Transpose by semitones (modulo 12 for octave wrapping)
-  const newIndex = (noteIndex + semitones + 12) % 12;
+  // Add multiple 12s to handle large negative numbers
+  const newIndex = ((noteIndex + semitones) % 12 + 12) % 12;
   const newRoot = noteScale[newIndex];
 
   return newRoot + quality;

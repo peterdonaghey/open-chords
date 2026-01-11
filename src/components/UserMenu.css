@@ -78,6 +78,19 @@
   word-break: break-word;
 }
 
+.admin-badge {
+  display: inline-block;
+  margin-top: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--accent-primary);
+  color: var(--bg-primary);
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 .user-menu-divider {
   height: 1px;
   background: var(--border-subtle);
@@ -110,6 +123,17 @@
 
 .user-menu-item span {
   flex: 1;
+}
+
+.admin-menu-item {
+  background: linear-gradient(90deg, transparent, rgba(232, 168, 124, 0.1));
+  color: var(--accent-primary);
+  font-weight: 600;
+}
+
+.admin-menu-item:hover {
+  background: linear-gradient(90deg, rgba(232, 168, 124, 0.1), rgba(232, 168, 124, 0.2));
+  color: var(--accent-primary);
 }
 
 /* Mobile responsive */

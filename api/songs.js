@@ -28,10 +28,13 @@ export default async function handler(req, res) {
     if (req.method === 'POST') {
       // Create a new song - AUTH OPTIONAL (allows anonymous)
       let userId = 'anonymous';
+      let ownerEmail = 'anonymous';
       
       try {
         // Try to authenticate, but allow anonymous if no auth provided
-        userId = await authenticateRequest(req);
+        const authResult = await authenticateRequest(req); // Returns { userId, email, isAdmin }
+        userId = authResult.userId;        // Extract userId from object
+        ownerEmail = authResult.email;     // Extract email from object
       } catch (error) {
         // If authentication fails, use anonymous
         console.log('No authentication provided, creating anonymous song');
@@ -44,7 +47,7 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Missing required fields: id, title, content' });
       }
 
-      const savedSong = await saveSong(userId, song);
+      const savedSong = await saveSong(userId, song, ownerEmail); // Pass ownerEmail as 3rd param
       // Transform songId to id for frontend compatibility
       return res.status(201).json({
         ...savedSong,

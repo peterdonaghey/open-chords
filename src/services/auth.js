@@ -1,154 +1,58 @@
 /**
- * Authentication Service - Handles AWS Cognito authentication
+ * Authentication Service - Simple custom auth
  */
-import {
-  CognitoUserPool,
-  CognitoUser,
-  AuthenticationDetails,
-  CognitoUserAttribute,
-} from 'amazon-cognito-identity-js';
 
-// Cognito User Pool configuration
-const poolData = {
-  UserPoolId: import.meta.env.VITE_COGNITO_USER_POOL_ID || '',
-  ClientId: import.meta.env.VITE_COGNITO_APP_CLIENT_ID || '',
-};
-
-// Only create user pool if credentials are available
-let userPool = null;
-if (poolData.UserPoolId && poolData.ClientId) {
-  try {
-    userPool = new CognitoUserPool(poolData);
-  } catch (error) {
-    console.error('Failed to initialize Cognito User Pool:', error);
-  }
-}
+const API_BASE = import.meta.env.PROD ? '/api' : 'https://open-chords.org/api';
+const TOKEN_KEY = 'auth_token';
 
 /**
  * Sign up a new user
  * @param {string} email - User's email address
  * @param {string} password - User's password
- * @returns {Promise<{user: CognitoUser, userSub: string}>}
+ * @returns {Promise<{token: string, user: object}>}
  */
 export async function signUp(email, password) {
-  if (!userPool) {
-    throw new Error('Cognito not configured. Please check environment variables.');
-  }
-  
-  return new Promise((resolve, reject) => {
-    const attributeList = [
-      new CognitoUserAttribute({
-        Name: 'email',
-        Value: email,
-      }),
-    ];
-
-    userPool.signUp(email, password, attributeList, null, (err, result) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-      resolve({
-        user: result.user,
-        userSub: result.userSub,
-      });
-    });
+  const response = await fetch(`${API_BASE}/auth/signup`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email, password }),
   });
-}
 
-/**
- * Confirm sign up with verification code
- * @param {string} email - User's email address
- * @param {string} code - Verification code from email
- * @returns {Promise<string>}
- */
-export async function confirmSignUp(email, code) {
-  if (!userPool) {
-    throw new Error('Cognito not configured');
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to sign up');
   }
-  
-  return new Promise((resolve, reject) => {
-    const userData = {
-      Username: email,
-      Pool: userPool,
-    };
 
-    const cognitoUser = new CognitoUser(userData);
-
-    cognitoUser.confirmRegistration(code, true, (err, result) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-      resolve(result);
-    });
-  });
-}
-
-/**
- * Resend confirmation code
- * @param {string} email - User's email address
- * @returns {Promise<string>}
- */
-export async function resendConfirmationCode(email) {
-  if (!userPool) {
-    throw new Error('Cognito not configured');
-  }
-  
-  return new Promise((resolve, reject) => {
-    const userData = {
-      Username: email,
-      Pool: userPool,
-    };
-
-    const cognitoUser = new CognitoUser(userData);
-
-    cognitoUser.resendConfirmationCode((err, result) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-      resolve(result);
-    });
-  });
+  const data = await response.json();
+  localStorage.setItem(TOKEN_KEY, data.token);
+  return data;
 }
 
 /**
  * Sign in a user
  * @param {string} email - User's email address
  * @param {string} password - User's password
- * @returns {Promise<{user: CognitoUser, session: CognitoUserSession}>}
+ * @returns {Promise<{token: string, user: object}>}
  */
 export async function signIn(email, password) {
-  if (!userPool) {
-    throw new Error('Cognito not configured');
-  }
-  
-  return new Promise((resolve, reject) => {
-    const authenticationDetails = new AuthenticationDetails({
-      Username: email,
-      Password: password,
-    });
-
-    const userData = {
-      Username: email,
-      Pool: userPool,
-    };
-
-    const cognitoUser = new CognitoUser(userData);
-
-    cognitoUser.authenticateUser(authenticationDetails, {
-      onSuccess: (session) => {
-        resolve({ user: cognitoUser, session });
-      },
-      onFailure: (err) => {
-        reject(err);
-      },
-      newPasswordRequired: () => {
-        reject(new Error('New password required'));
-      },
-    });
+  const response = await fetch(`${API_BASE}/auth/signin`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email, password }),
   });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to sign in');
+  }
+
+  const data = await response.json();
+  localStorage.setItem(TOKEN_KEY, data.token);
+  return data;
 }
 
 /**
@@ -156,63 +60,39 @@ export async function signIn(email, password) {
  * @returns {Promise<void>}
  */
 export async function signOut() {
-  if (!userPool) {
-    return;
-  }
-  
-  const cognitoUser = userPool.getCurrentUser();
-  if (cognitoUser) {
-    cognitoUser.signOut();
-  }
+  localStorage.removeItem(TOKEN_KEY);
 }
 
 /**
  * Get the current authenticated user
- * @returns {Promise<{email: string, userId: string, emailVerified: boolean}>}
+ * @returns {Promise<{email: string, userId: string, role: string}>}
  */
 export async function getCurrentUser() {
-  if (!userPool) {
-    throw new Error('Cognito not configured');
+  const token = localStorage.getItem(TOKEN_KEY);
+
+  if (!token) {
+    throw new Error('No user found');
   }
-  
-  return new Promise((resolve, reject) => {
-    const cognitoUser = userPool.getCurrentUser();
 
-    if (!cognitoUser) {
-      reject(new Error('No user found'));
-      return;
-    }
-
-    cognitoUser.getSession((err, session) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-
-      if (!session.isValid()) {
-        reject(new Error('Session is not valid'));
-        return;
-      }
-
-      cognitoUser.getUserAttributes((err, attributes) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-
-        const email = attributes.find(attr => attr.Name === 'email')?.Value;
-        const emailVerified = attributes.find(attr => attr.Name === 'email_verified')?.Value === 'true';
-        const userId = attributes.find(attr => attr.Name === 'sub')?.Value;
-
-        resolve({
-          email,
-          userId,
-          emailVerified,
-          cognitoUser,
-        });
-      });
-    });
+  const response = await fetch(`${API_BASE}/auth/me`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
   });
+
+  if (!response.ok) {
+    localStorage.removeItem(TOKEN_KEY);
+    throw new Error('Session expired');
+  }
+
+  const user = await response.json();
+  return {
+    email: user.email,
+    userId: user.userId,
+    role: user.role,
+    emailVerified: true, // No email verification in simple auth
+  };
 }
 
 /**
@@ -220,32 +100,13 @@ export async function getCurrentUser() {
  * @returns {Promise<string>}
  */
 export async function getIdToken() {
-  if (!userPool) {
-    throw new Error('Cognito not configured');
+  const token = localStorage.getItem(TOKEN_KEY);
+
+  if (!token) {
+    throw new Error('No user found');
   }
-  
-  return new Promise((resolve, reject) => {
-    const cognitoUser = userPool.getCurrentUser();
 
-    if (!cognitoUser) {
-      reject(new Error('No user found'));
-      return;
-    }
-
-    cognitoUser.getSession((err, session) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-
-      if (!session.isValid()) {
-        reject(new Error('Session is not valid'));
-        return;
-      }
-
-      resolve(session.getIdToken().getJwtToken());
-    });
-  });
+  return token;
 }
 
 /**
@@ -264,71 +125,96 @@ export async function isAuthenticated() {
 /**
  * Initiate forgot password flow
  * @param {string} email - User's email address
- * @returns {Promise<any>}
+ * @returns {Promise<{message: string, resetToken: string, resetUrl: string}>}
  */
 export async function forgotPassword(email) {
-  if (!userPool) {
-    throw new Error('Cognito not configured');
-  }
-  
-  return new Promise((resolve, reject) => {
-    const userData = {
-      Username: email,
-      Pool: userPool,
-    };
-
-    const cognitoUser = new CognitoUser(userData);
-
-    cognitoUser.forgotPassword({
-      onSuccess: (data) => {
-        resolve(data);
-      },
-      onFailure: (err) => {
-        reject(err);
-      },
-    });
+  const response = await fetch(`${API_BASE}/auth/forgot-password`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email }),
   });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to process request');
+  }
+
+  return await response.json();
 }
 
 /**
- * Confirm new password with code
+ * Reset password with token
  * @param {string} email - User's email address
- * @param {string} code - Verification code from email
+ * @param {string} resetToken - Reset token from forgot password
  * @param {string} newPassword - New password
- * @returns {Promise<string>}
+ * @returns {Promise<{message: string}>}
+ */
+export async function resetPassword(email, resetToken, newPassword) {
+  const response = await fetch(`${API_BASE}/auth/reset-password`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email, resetToken, newPassword }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to reset password');
+  }
+
+  return await response.json();
+}
+
+/**
+ * Confirm password (alias for resetPassword for backward compatibility)
  */
 export async function confirmPassword(email, code, newPassword) {
-  if (!userPool) {
-    throw new Error('Cognito not configured');
-  }
-  
-  return new Promise((resolve, reject) => {
-    const userData = {
-      Username: email,
-      Pool: userPool,
-    };
-
-    const cognitoUser = new CognitoUser(userData);
-
-    cognitoUser.confirmPassword(code, newPassword, {
-      onSuccess: () => {
-        resolve('Password reset successful');
-      },
-      onFailure: (err) => {
-        reject(err);
-      },
-    });
-  });
+  return resetPassword(email, code, newPassword);
 }
 
 /**
- * Get user pool instance
- * @returns {CognitoUserPool}
+ * Change password (authenticated user changes their own password)
+ * @param {string} currentPassword - Current password
+ * @param {string} newPassword - New password
+ * @returns {Promise<{message: string}>}
  */
-export function getUserPool() {
-  if (!userPool) {
-    console.warn('Cognito User Pool not configured. Check environment variables.');
+export async function changePassword(currentPassword, newPassword) {
+  const token = localStorage.getItem(TOKEN_KEY);
+
+  if (!token) {
+    throw new Error('Not authenticated');
   }
-  return userPool;
+
+  const response = await fetch(`${API_BASE}/auth/change-password`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ currentPassword, newPassword }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to change password');
+  }
+
+  return await response.json();
 }
 
+/**
+ * Confirm sign up (no-op for backward compatibility)
+ */
+export async function confirmSignUp(email, code) {
+  return Promise.resolve('No email verification required');
+}
+
+/**
+ * Resend confirmation code (no-op for backward compatibility)
+ */
+export async function resendConfirmationCode(email) {
+  return Promise.resolve('No email verification required');
+}

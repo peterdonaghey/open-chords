@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Get My User ID</title>
+    <style>
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #0a0a0f;
+            color: #e8e8ea;
+        }
+        .container {
+            background: #1a1a24;
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid #2a2a3c;
+        }
+        h1 {
+            color: #ff6b35;
+            margin-top: 0;
+        }
+        .result {
+            background: #0f0f17;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #00d4ff;
+        }
+        .code {
+            background: #000;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+        button {
+            background: #ff6b35;
+            color: #0a0a0f;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #ff8555;
+        }
+        .error {
+            color: #ff6b6b;
+        }
+        .success {
+            color: #00ff88;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Get My User ID</h1>
+        <p>This tool extracts your Cognito User ID (sub) from your browser's localStorage.</p>
+        
+        <button onclick="getUserId()">Get My User ID</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function getUserId() {
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                // Get the last authenticated user
+                const clientId = '3pa4i14pa0dhjaqgtoli2pl3q6';
+                const lastAuthUserKey = `CognitoIdentityServiceProvider.${clientId}.LastAuthUser`;
+                const username = localStorage.getItem(lastAuthUserKey);
+                
+                if (!username) {
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            <strong>❌ Not logged in</strong>
+                            <p>You need to be logged in to the app first.</p>
+                            <ol>
+                                <li>Open <a href="http://localhost:5174" target="_blank">http://localhost:5174</a></li>
+                                <li>Sign in with your account</li>
+                                <li>Come back here and click "Get My User ID" again</li>
+                            </ol>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Get the ID token which contains the user's sub
+                const idTokenKey = `CognitoIdentityServiceProvider.${clientId}.${username}.idToken`;
+                const idToken = localStorage.getItem(idTokenKey);
+                
+                if (!idToken) {
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            <strong>❌ No ID token found</strong>
+                            <p>Please sign in again to refresh your session.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Decode the JWT token (it's base64 encoded)
+                const tokenParts = idToken.split('.');
+                const payload = JSON.parse(atob(tokenParts[1]));
+                
+                const userId = payload.sub;
+                const email = payload.email;
+                
+                resultDiv.innerHTML = `
+                    <div class="result success">
+                        <strong>✅ Found your user info!</strong>
+                        <p><strong>User ID (sub):</strong></p>
+                        <div class="code">${userId}</div>
+                        
+                        <p><strong>Email:</strong></p>
+                        <div class="code">${email}</div>
+                        
+                        <p style="margin-top: 20px;"><strong>📋 Run this command:</strong></p>
+                        <div class="code">node scripts/set-owner-all-songs.js "${userId}" "${email}"</div>
+                        
+                        <button onclick="copyCommand('${userId}', '${email}')">📋 Copy Command</button>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <strong>❌ Error</strong>
+                        <p>${error.message}</p>
+                        <p>Make sure you're logged in to the app first.</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function copyCommand(userId, email) {
+            const command = `node scripts/set-owner-all-songs.js "${userId}" "${email}"`;
+            navigator.clipboard.writeText(command).then(() => {
+                alert('✅ Command copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                alert('❌ Failed to copy. Please copy manually from above.');
+            });
+        }
+    </script>
+</body>
+</html>
+

@@ -40,3 +40,4 @@ logs/
 
 # AWS
 s3-cors.json
+.env.vercel.temp

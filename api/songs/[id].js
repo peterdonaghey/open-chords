@@ -1,6 +1,6 @@
 // API endpoint: GET /api/songs/[id] - Get a specific song (PUBLIC)
 // API endpoint: PUT /api/songs/[id] - Update a song (AUTH REQUIRED)
-// API endpoint: DELETE /api/songs/[id] - Delete a song (AUTH REQUIRED)
+// API endpoint: DELETE /api/songs/[id] - Delete a song (AUTH REQUIRED, or ADMIN)
 import { getSong, getSongById, updateSong, deleteSong } from '../_dynamodb.js';
 import { authenticateRequest } from '../_auth.js';
 
@@ -37,7 +37,7 @@ export default async function handler(req, res) {
     }
 
     // Auth required for PUT and DELETE
-    const userId = await authenticateRequest(req);
+    const authResult = await authenticateRequest(req);
 
     if (req.method === 'PUT') {
       // Update a song
@@ -54,12 +54,12 @@ export default async function handler(req, res) {
       }
 
       // Verify song belongs to user
-      const existingSong = await getSong(userId, id);
+      const existingSong = await getSong(authResult.userId, id);
       if (!existingSong) {
         return res.status(404).json({ error: 'Song not found or access denied' });
       }
 
-      const updatedSong = await updateSong(userId, song);
+      const updatedSong = await updateSong(authResult.userId, song);
       // Transform songId to id for frontend compatibility
       return res.status(200).json({
         ...updatedSong,
@@ -68,13 +68,22 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'DELETE') {
-      // Verify song belongs to user before deleting
-      const existingSong = await getSong(userId, id);
+      // Get the song first
+      const existingSong = await getSongById(id);
+      
       if (!existingSong) {
-        return res.status(404).json({ error: 'Song not found or access denied' });
+        return res.status(404).json({ error: 'Song not found' });
       }
 
-      await deleteSong(userId, id);
+      // Check if user owns the song OR is admin
+      const isOwner = existingSong.userId === authResult.userId;
+      
+      if (!isOwner && !authResult.isAdmin) {
+        return res.status(403).json({ error: 'You do not have permission to delete this song' });
+      }
+
+      // Delete the song (use the song's userId for DynamoDB key)
+      await deleteSong(existingSong.userId, id);
       return res.status(200).json({ success: true, message: 'Song deleted' });
     }
 

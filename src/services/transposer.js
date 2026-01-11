@@ -23,7 +23,7 @@ export function transposeSong(songText, semitones, originalKey = null) {
  */
 export function transposeSongToKey(songText, fromKey, toKey) {
   const semitones = getSemitoneDifference(fromKey, toKey);
-  return transposeSong(songText, semitones, fromKey);
+  return transposeSong(songText, semitones, toKey); // Use toKey for sharp/flat preference
 }
 
 /**

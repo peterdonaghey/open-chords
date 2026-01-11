@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 import './SongList.css';
 
 /**
  * SongList component - browse and search songs
  */
 function SongList({ songs, onSelectSong, onNewSong, onDeleteSong }) {
+  const { user, isAuthenticated, isAdmin } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredSongs, setFilteredSongs] = useState(songs);
   const [sortBy, setSortBy] = useState('title'); // title, artist, updatedAt
@@ -101,6 +103,9 @@ function SongList({ songs, onSelectSong, onNewSong, onDeleteSong }) {
                     song={song}
                     onSelect={() => onSelectSong(song)}
                     onDelete={() => onDeleteSong(song)}
+                    currentUser={user}
+                    isAuthenticated={isAuthenticated}
+                    isAdmin={isAdmin}
                   />
                 ))}
               </div>
@@ -115,6 +120,9 @@ function SongList({ songs, onSelectSong, onNewSong, onDeleteSong }) {
               song={song}
               onSelect={() => onSelectSong(song)}
               onDelete={() => onDeleteSong(song)}
+              currentUser={user}
+              isAuthenticated={isAuthenticated}
+              isAdmin={isAdmin}
             />
           ))}
         </div>
@@ -126,8 +134,12 @@ function SongList({ songs, onSelectSong, onNewSong, onDeleteSong }) {
 /**
  * SongCard component - individual song item
  */
-function SongCard({ song, onSelect, onDelete }) {
+function SongCard({ song, onSelect, onDelete, currentUser, isAuthenticated, isAdmin }) {
   const [showMenu, setShowMenu] = useState(false);
+
+  // Check if user can delete this song (owner OR admin)
+  const isOwner = isAuthenticated && currentUser && song.userId === currentUser.userId;
+  const canDelete = isOwner || isAdmin;
 
   const handleDelete = (e) => {
     e.stopPropagation();
@@ -142,30 +154,42 @@ function SongCard({ song, onSelect, onDelete }) {
       <div className="song-card-content">
         <h3 className="song-card-title">{song.title}</h3>
         <p className="song-card-artist">{song.artist}</p>
-        {song.key && (
-          <span className="song-card-key">Key: {song.key}</span>
-        )}
+        <div className="song-card-meta">
+          {song.key && (
+            <span className="song-card-key">Key: {song.key}</span>
+          )}
+          {song.ownerEmail && song.ownerEmail !== 'anonymous' && (
+            <span className="song-card-owner">
+              {isOwner ? '👤 You' : `👤 ${song.ownerEmail}`}
+            </span>
+          )}
+          {isAdmin && !isOwner && song.userId && song.userId !== 'anonymous' && (
+            <span className="song-card-admin-badge">⚡ Admin</span>
+          )}
+        </div>
       </div>
 
-      <div className="song-card-actions">
-        <button
-          className="song-menu-btn"
-          onClick={(e) => {
-            e.stopPropagation();
-            setShowMenu(!showMenu);
-          }}
-        >
-          ⋮
-        </button>
+      {canDelete && (
+        <div className="song-card-actions">
+          <button
+            className="song-menu-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowMenu(!showMenu);
+            }}
+          >
+            ⋮
+          </button>
 
-        {showMenu && (
-          <div className="song-menu">
-            <button onClick={handleDelete} className="menu-item-delete">
-              Delete
-            </button>
-          </div>
-        )}
-      </div>
+          {showMenu && (
+            <div className="song-menu">
+              <button onClick={handleDelete} className="menu-item-delete">
+                Delete
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

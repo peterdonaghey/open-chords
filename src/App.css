@@ -1,253 +1,115 @@
-* {
-  box-sizing: border-box;
-}
+/* === BASE LAYOUT === */
 
-.app {
+/* Page content wrapper - adds spacing for fixed navbar */
+.page-content {
+  padding-top: 60px; /* Space for fixed navbar */
   min-height: 100vh;
-  background: var(--bg-primary);
 }
 
-/* Home Page */
-.home-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
-}
-
-.home-hero {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-subtle);
-  border-radius: 16px;
-  padding: 4rem 3rem;
-  text-align: center;
-  box-shadow: var(--shadow-lg);
-  margin-bottom: 3rem;
-  position: relative;
+/* View song page - full viewport */
+.view-song-page {
+  min-height: 100vh;
+  height: 100vh;
+  padding: 0;
   overflow: hidden;
-}
-
-.home-hero::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--accent-tertiary), var(--accent-primary), var(--accent-tertiary));
-}
-
-.home-hero h1 {
-  font-size: clamp(2.5rem, 6vw, 4rem);
-  margin: 0 0 1rem 0;
-  font-family: 'IBM Plex Mono', monospace;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--text-primary) 50%, var(--accent-primary) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.tagline {
-  font-size: 1.4rem;
-  color: var(--text-secondary);
-  margin: 0 0 0.75rem 0;
-  font-weight: 500;
-}
-
-.description {
-  font-size: 1.05rem;
-  color: var(--text-muted);
-  margin: 0 0 2.5rem 0;
-  line-height: 1.7;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.storage-options {
-  max-width: 550px;
-  margin: 2rem auto;
-  text-align: left;
-}
-
-.storage-options h3 {
-  margin: 0 0 1rem 0;
-  color: var(--text-primary);
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-
-.storage-option {
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  padding: 1.25rem;
-  border: 1px solid var(--border-subtle);
-  background: var(--bg-secondary);
-  border-radius: 10px;
-  margin-bottom: 0.75rem;
-  cursor: pointer;
-  transition: all 0.25s ease;
-}
-
-.storage-option:hover:not(.disabled) {
-  border-color: var(--accent-primary);
-  background: var(--bg-card);
-  box-shadow: var(--shadow-glow);
-  transform: translateX(4px);
-}
-
-.storage-option.disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.storage-option input[type="radio"] {
-  margin-top: 0.25rem;
-  cursor: pointer;
-  accent-color: var(--accent-primary);
-  width: 18px;
-  height: 18px;
-}
-
-.storage-option div {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
 }
 
-.storage-option strong {
-  color: var(--text-primary);
-  font-size: 1rem;
-  font-weight: 600;
+.view-song-page .view-song-container {
+  flex: 1;
+  overflow: auto;
+  padding-top: 60px; /* Space for navbar when visible/pinned */
 }
 
-.storage-option span {
-  color: var(--text-muted);
-  font-size: 0.85rem;
+/* When in compact mode, remove padding to maximize space */
+.view-song-page .view-song-container.compact-mode {
+  padding-top: 0;
+  overflow: hidden; /* Compact mode has its own scroll handling */
 }
 
-.btn-get-started {
-  padding: 1rem 2.5rem;
-  font-size: 1.1rem;
-  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-tertiary) 100%);
-  color: var(--bg-primary);
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  font-family: 'IBM Plex Mono', monospace;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  transition: all 0.25s ease;
-  margin-top: 1.5rem;
-  box-shadow: 0 4px 20px rgba(232, 168, 124, 0.25);
-}
-
-.btn-get-started:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 30px rgba(232, 168, 124, 0.35);
-}
-
-.btn-get-started:active {
-  transform: translateY(-1px);
-}
-
-.home-features {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-subtle);
-  border-radius: 16px;
-  padding: 3rem;
-  box-shadow: var(--shadow-md);
-}
-
-.home-features h2 {
-  text-align: center;
-  margin: 0 0 2.5rem 0;
-  color: var(--text-primary);
-  font-size: 1.75rem;
-  font-family: 'IBM Plex Mono', monospace;
-}
-
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 2rem;
-}
-
-.feature {
-  text-align: center;
-  padding: 1.5rem;
-  border-radius: 12px;
-  transition: all 0.25s ease;
-}
-
-.feature:hover {
-  background: var(--bg-card);
-}
-
-.feature h3 {
-  margin: 0 0 0.75rem 0;
-  color: var(--accent-primary);
-  font-size: 1.3rem;
-  font-weight: 600;
-}
-
-.feature p {
-  margin: 0;
-  color: var(--text-muted);
-  line-height: 1.6;
-}
-
-/* App Header */
+/* === OLD STYLES TO BE CLEANED UP === */
 .app-header {
-  background: var(--bg-elevated);
-  border-bottom: 1px solid var(--border-subtle);
-  padding: 1rem 2rem;
-  box-shadow: var(--shadow-sm);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 1rem 1.5rem;
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.3s ease-in-out, padding 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+
+/* Compact header for song view */
+.app-header.compact {
+  padding: 0.4rem 1rem;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: rgba(197, 252, 255, 0.95);
+  backdrop-filter: blur(10px);
+}
+
+/* Auto-hide behavior - IMPORTANT: This must work! */
+.view-song-page .app-header.compact.hidden {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.view-song-page .app-header.compact.visible {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.app-header.compact h1 {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.app-header.compact .header-actions {
+  gap: 0.5rem;
+}
+
+.app-header.compact .btn-icon {
+  padding: 0.35rem;
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.app-header.compact .btn-icon:hover {
+  background: rgba(0, 0, 0, 0.1);
 }
 
 .app-header h1 {
   margin: 0;
-  color: var(--accent-primary);
-  cursor: pointer;
   font-size: 1.5rem;
+  color: var(--accent-primary);
   font-family: 'IBM Plex Mono', monospace;
   font-weight: 700;
   letter-spacing: -0.02em;
-  transition: all 0.2s;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .app-header h1:hover {
   color: var(--text-primary);
-  text-shadow: 0 0 16px rgba(232, 168, 124, 0.4);
+  text-shadow: 0 0 20px rgba(232, 168, 124, 0.4);
 }
 
 .header-actions {
   display: flex;
+  align-items: center;
   gap: 0.75rem;
 }
 
-.header-user-info {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.user-email {
-  color: var(--text-muted);
-  font-size: 0.9rem;
-}
-
-.btn-signin,
-.btn-signup,
-.btn-signout,
 .btn-edit,
 .btn-back {
   padding: 0.5rem 1rem;
@@ -255,7 +117,7 @@
   border-radius: 6px;
   cursor: pointer;
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 600;
   transition: all 0.2s;
   font-family: 'Space Grotesk', sans-serif;
 }
@@ -267,177 +129,129 @@
 
 .btn-edit:hover {
   background: var(--accent-secondary);
+  transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(232, 168, 124, 0.3);
 }
 
 .btn-back {
   background: var(--bg-secondary);
   color: var(--text-secondary);
-  border: 1px solid var(--border-medium);
+  border: 1px solid var(--border-subtle);
 }
 
 .btn-back:hover {
   background: var(--bg-card);
   color: var(--text-primary);
-  border-color: var(--accent-primary);
+  border-color: var(--border-medium);
 }
 
-/* View Song Container */
-.view-song-container {
-  max-width: 1000px;
-  margin: 2rem auto;
-  padding: 0 2rem;
-}
-
-/* Compact mode - full width for multi-column layout */
-.view-song-container.compact-mode {
-  max-width: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-/* Loading State */
-.loading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 60vh;
-  font-size: 1.25rem;
-  color: var(--text-muted);
-  font-family: 'IBM Plex Mono', monospace;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .home-page {
-    padding: 1rem;
-  }
-
-  .home-hero {
-    padding: 2.5rem 1.5rem;
-    border-radius: 12px;
-  }
-
-  .home-hero h1 {
-    font-size: 2rem;
-  }
-
-  .tagline {
-    font-size: 1.1rem;
-  }
-
-  .description {
-    font-size: 0.95rem;
-  }
-
-  .home-features {
-    padding: 2rem 1.5rem;
-    border-radius: 12px;
-  }
-
-  .features-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-
-  .app-header {
-    padding: 1rem;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-
-  .header-actions {
-    width: 100%;
-  }
-
-  .btn-edit,
-  .btn-back {
-    flex: 1;
-  }
-
-  .view-song-container {
-    padding: 0 1rem;
-  }
-
-  .view-song-container.compact-mode {
-    padding: 0;
-  }
-}
-
-/* Sign in/Sign up buttons */
-.btn-signin {
-  background: transparent !important;
-  color: var(--accent-primary) !important;
-  border: 1px solid var(--accent-primary) !important;
-}
-
-.btn-signin:hover {
-  background: var(--accent-primary) !important;
-  color: var(--bg-primary) !important;
-}
-
-.btn-signup {
-  background: var(--accent-primary) !important;
-  color: var(--bg-primary) !important;
-}
-
-.btn-signup:hover {
-  background: var(--accent-secondary) !important;
-  box-shadow: 0 4px 12px rgba(232, 168, 124, 0.3) !important;
-}
-
-.btn-signout {
-  background: var(--bg-secondary) !important;
-  color: var(--text-muted) !important;
-  border: 1px solid var(--border-subtle) !important;
-}
-
-.btn-signout:hover {
-  background: var(--bg-card) !important;
-  color: var(--text-primary) !important;
-  border-color: var(--border-medium) !important;
-}
-
-/* User Status Display */
-.user-status {
-  padding: 12px 20px;
+.btn-secondary {
+  padding: 0.5rem 1rem;
   background: var(--bg-secondary);
+  color: var(--text-secondary);
   border: 1px solid var(--border-subtle);
-  border-radius: 8px;
-  font-size: 14px;
-  color: var(--text-muted);
-  margin-bottom: 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.2s;
+  font-family: 'Space Grotesk', sans-serif;
 }
 
-.logged-in-as strong {
+.btn-secondary:hover {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-color: var(--border-medium);
+  transform: translateY(-1px);
+}
+
+/* Page title bar styles */
+.page-title-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: var(--background);
+  border-bottom: 1px solid var(--border);
+}
+
+.page-title-bar h2 {
+  margin: 0;
+  font-size: 1.5rem;
   color: var(--text-primary);
 }
 
-.anonymous-user {
-  color: var(--text-muted);
+/* Song owner badge */
+.song-owner-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  background: var(--primary-light);
+  color: var(--primary);
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
-.anonymous-user strong {
+/* Song card meta container */
+.song-card-meta {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.song-card-owner {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.75rem;
   color: var(--text-secondary);
 }
 
-.inline-login-btn {
-  background: none;
-  border: none;
-  color: var(--accent-primary);
-  cursor: pointer;
-  font-weight: 600;
-  text-decoration: underline;
-  padding: 0;
+/* Songs page layout */
+.songs-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-primary);
 }
 
-.inline-login-btn:hover {
-  color: var(--accent-secondary);
+.view-song-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-primary);
 }
 
-.song-editor-header {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
+/* Add padding when compact header is present */
+.view-song-page.has-compact-header {
+  padding-top: 0;
+}
+
+.view-song-container {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.view-song-container.compact-mode {
+  padding-top: 0;
+}
+
+/* Loading and error states */
+.loading,
+.error {
+  text-align: center;
+  padding: 3rem 2rem;
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+}
+
+.error {
+  color: var(--error);
 }

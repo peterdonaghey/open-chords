@@ -54,6 +54,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background: var(--bg-primary);
+  font-size: 14px;
   /* Subtle noise texture effect */
   background-image: 
     radial-gradient(circle at 20% 80%, rgba(232, 168, 124, 0.03) 0%, transparent 50%),

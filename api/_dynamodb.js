@@ -83,7 +83,7 @@ export async function getSong(userId, songId) {
 /**
  * Save a new song
  */
-export async function saveSong(userId, song) {
+export async function saveSong(userId, song, ownerEmail = 'anonymous') {
   const now = new Date().toISOString();
   
   const item = {
@@ -95,6 +95,7 @@ export async function saveSong(userId, song) {
     content: song.content,
     createdAt: now,
     updatedAt: now,
+    ownerEmail,  // Store owner's email
   };
 
   const command = new PutCommand({

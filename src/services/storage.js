@@ -115,6 +115,8 @@ export async function updateSong(song) {
       headers,
       body: JSON.stringify(song),
     });
+    
+    // Check for auth errors first
     handleResponse(response);
     
     if (!response.ok) {
@@ -137,6 +139,8 @@ export async function deleteSong(id) {
       method: 'DELETE',
       headers,
     });
+    
+    // Check for auth errors first, before checking response.ok
     handleResponse(response);
     
     if (!response.ok) {
