@@ -3,9 +3,48 @@ import { useTheme } from '../context/ThemeContext';
 import './ThemeSelector.css';
 
 export default function ThemeSelector({ onDropdownChange }) {
-  const { currentTheme, changeTheme, themes } = useTheme();
+  const { currentTheme, changeTheme, themesByCategory } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
+  const [focusedIndex, setFocusedIndex] = useState(-1);
   const dropdownRef = useRef(null);
+  const themeButtonRefs = useRef([]);
+
+  // Get flat list of all theme keys in order
+  const getAllThemeKeys = () => {
+    const keys = [];
+    Object.keys(categoryNames).forEach(categoryKey => {
+      const themesInCategory = themesByCategory[categoryKey];
+      if (themesInCategory && themesInCategory.length > 0) {
+        themesInCategory.forEach(theme => keys.push(theme.key));
+      }
+    });
+    return keys;
+  };
+
+  // Handle keyboard navigation
+  useEffect(() => {
+    function handleKeyDown(event) {
+      const allThemeKeys = getAllThemeKeys();
+      const currentIndex = allThemeKeys.indexOf(currentTheme);
+      
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        const prevIndex = currentIndex > 0 ? currentIndex - 1 : allThemeKeys.length - 1;
+        changeTheme(allThemeKeys[prevIndex]);
+        setFocusedIndex(prevIndex);
+      } else if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+        event.preventDefault();
+        const nextIndex = currentIndex < allThemeKeys.length - 1 ? currentIndex + 1 : 0;
+        changeTheme(allThemeKeys[nextIndex]);
+        setFocusedIndex(nextIndex);
+      } else if (event.key === 'Escape' && isOpen) {
+        setIsOpen(false);
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [currentTheme, themesByCategory, changeTheme, isOpen]);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -32,6 +71,25 @@ export default function ThemeSelector({ onDropdownChange }) {
     setIsOpen(false);
   };
 
+  const categoryNames = {
+    retro: '🕹️ Retro',
+    neon: '⚡ Neon',
+    vintage: '📜 Vintage',
+    light: '☀️ Light',
+    dark: '🌙 Dark',
+    accessible: '♿ Accessible',
+  };
+
+  // Scroll focused theme into view
+  useEffect(() => {
+    if (focusedIndex >= 0 && themeButtonRefs.current[focusedIndex]) {
+      themeButtonRefs.current[focusedIndex]?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+      });
+    }
+  }, [focusedIndex]);
+
   return (
     <div className="theme-selector" ref={dropdownRef}>
       <button
@@ -56,31 +114,51 @@ export default function ThemeSelector({ onDropdownChange }) {
 
       {isOpen && (
         <div className="theme-dropdown">
-          <div className="theme-dropdown-header">Choose Theme</div>
-          {Object.entries(themes).map(([key, theme]) => (
-            <button
-              key={key}
-              className={`theme-option ${currentTheme === key ? 'active' : ''}`}
-              onClick={() => handleThemeSelect(key)}
-            >
-              <div className="theme-preview">
-                <div
-                  className="color-swatch"
-                  style={{ backgroundColor: theme.colors['--bg-primary'] }}
-                />
-                <div
-                  className="color-swatch"
-                  style={{ backgroundColor: theme.colors['--accent-primary'] }}
-                />
-                <div
-                  className="color-swatch"
-                  style={{ backgroundColor: theme.colors['--text-primary'] }}
-                />
-              </div>
-              <span className="theme-name">{theme.name}</span>
-              {currentTheme === key && <span className="checkmark">✓</span>}
-            </button>
-          ))}
+          <div className="theme-dropdown-header">
+            Choose Theme
+            <span className="keyboard-hint">Use ← → ↑ ↓ to cycle</span>
+          </div>
+          {(() => {
+            let themeIndex = 0;
+            return Object.entries(categoryNames).map(([categoryKey, categoryName]) => {
+              const themesInCategory = themesByCategory[categoryKey];
+              if (!themesInCategory || themesInCategory.length === 0) return null;
+
+              return (
+                <div key={categoryKey} className="theme-category">
+                  <div className="category-label">{categoryName}</div>
+                  {themesInCategory.map(({ key, name, colors }) => {
+                    const currentIndex = themeIndex++;
+                    return (
+                      <button
+                        key={key}
+                        ref={el => themeButtonRefs.current[currentIndex] = el}
+                        className={`theme-option ${currentTheme === key ? 'active' : ''}`}
+                        onClick={() => handleThemeSelect(key)}
+                      >
+                        <div className="theme-preview">
+                          <div
+                            className="color-swatch"
+                            style={{ backgroundColor: colors['--bg-primary'] }}
+                          />
+                          <div
+                            className="color-swatch"
+                            style={{ backgroundColor: colors['--accent-primary'] }}
+                          />
+                          <div
+                            className="color-swatch"
+                            style={{ backgroundColor: colors['--text-primary'] }}
+                          />
+                        </div>
+                        <span className="theme-name">{name}</span>
+                        {currentTheme === key && <span className="checkmark">✓</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+              );
+            });
+          })()}
         </div>
       )}
     </div>

@@ -19,10 +19,10 @@ dotenv.config({ path: '.env.local' });
 const scryptAsync = promisify(scrypt);
 
 const client = new DynamoDBClient({
-  region: process.env.AWS_REGION || 'eu-central-1',
+  region: process.env.AWS_REGION,
   credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    accessKeyId: process.env.VITE_AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.VITE_AWS_SECRET_ACCESS_KEY,
   },
 });
 
@@ -39,19 +39,19 @@ async function hashPassword(password) {
 }
 
 async function seedAdmin() {
-  const email = process.env.ADMIN_EMAIL;
-  const password = process.env.ADMIN_PASSWORD;
+  const email = process.env.VITE_ADMIN_EMAIL;
+  const password = process.env.VITE_ADMIN_PASSWORD;
 
   if (!email || !password) {
     console.error('❌ Missing ADMIN_EMAIL or ADMIN_PASSWORD in .env.local');
     console.error('   Add these to your .env.local file:');
-    console.error('   ADMIN_EMAIL=your-email@example.com');
-    console.error('   ADMIN_PASSWORD=your-secure-password');
+    console.error('   VITE_ADMIN_EMAIL=your-email@example.com');
+    console.error('   VITE_ADMIN_PASSWORD=your-secure-password');
     process.exit(1);
   }
 
   if (password.length < 8) {
-    console.error('❌ ADMIN_PASSWORD must be at least 8 characters');
+    console.error('❌ VITE_ADMIN_PASSWORD must be at least 8 characters');
     process.exit(1);
   }
 
