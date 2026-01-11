@@ -5,8 +5,8 @@
 
 import { getIdToken } from './auth';
 
-// Always use production API - even in local dev, we hit the live database
-const API_BASE = import.meta.env.PROD ? '/api' : 'https://open-chords.org/api';
+// API works on all domains - production, vercel previews, and local dev
+const API_BASE = import.meta.env.DEV ? 'https://open-chords.org/api' : '/api';
 
 /**
  * Get authorization headers with JWT token
@@ -120,7 +120,9 @@ export async function updateSong(song) {
     handleResponse(response);
     
     if (!response.ok) {
-      throw new Error(`Failed to update song: ${response.statusText}`);
+      const errorData = await response.json().catch(() => ({ error: response.statusText }));
+      const errorMsg = errorData.error || errorData.message || response.statusText;
+      throw new Error(`Failed to update song: ${errorMsg} (Status: ${response.status})`);
     }
     return await response.json();
   } catch (error) {

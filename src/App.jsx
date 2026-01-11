@@ -340,9 +340,13 @@ function EditSongPage() {
       await updateSong(songData);
       navigate(`/song/view/${songData.id}`);
     } catch (err) {
-      setError('Failed to save song. Please try again.');
+      const errorMessage = err.message || 'Failed to save song. Please try again.';
+      setError(errorMessage);
       console.error('Error saving song:', err);
       setSaving(false);
+      
+      // Show alert for immediate feedback
+      alert(`Error: ${errorMessage}`);
     }
   };
 
@@ -383,6 +387,12 @@ function EditSongPage() {
     <div className="edit-song-page">
       <UnifiedNavBar mode="normal" />
       <div className="page-content">
+        {error && (
+          <div className="error-banner">
+            <strong>Error:</strong> {error}
+            <button onClick={() => setError(null)} className="error-close">×</button>
+          </div>
+        )}
         <div className="user-status">
           {isAuthenticated ? (
             <span className="logged-in-as">
