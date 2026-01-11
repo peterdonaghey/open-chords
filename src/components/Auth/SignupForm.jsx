@@ -61,13 +61,12 @@ export default function SignupForm() {
     try {
       setLoading(true);
       await signUp(email, password);
-      navigate('/verify-email', { state: { email } });
+      // Custom auth logs user in immediately, no email verification needed
+      navigate('/');
     } catch (err) {
       console.error('Signup error:', err);
-      if (err.code === 'UsernameExistsException') {
+      if (err.message.includes('already exists')) {
         setError('An account with this email already exists');
-      } else if (err.code === 'InvalidPasswordException') {
-        setError('Password does not meet requirements');
       } else {
         setError(err.message || 'Failed to create account. Please try again.');
       }

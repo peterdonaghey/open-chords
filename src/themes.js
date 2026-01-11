@@ -781,6 +781,272 @@ export const themes = {
       '--border-medium': '#b8a898',
     }
   },
+
+  // ===== RAINBOW THEMES =====
+  rainbowLight: {
+    name: 'Rainbow Light',
+    category: 'rainbow',
+    colors: {
+      '--bg-primary': '#ffffff',
+      '--bg-secondary': '#f8f9fa',
+      '--bg-elevated': '#fefefe',
+      '--bg-card': '#f1f3f5',
+      '--text-primary': '#212529',
+      '--text-secondary': '#495057',
+      '--text-muted': '#6c757d',
+      '--accent-primary': '#e6261f',
+      '--accent-secondary': '#f7d038',
+      '--accent-tertiary': '#34bbe6',
+      '--success': '#a3e048',
+      '--error': '#e6261f',
+      '--warning': '#eb7532',
+      '--border-subtle': '#49da9a',
+      '--border-medium': '#4355db',
+    }
+  },
+
+  rainbowDark: {
+    name: 'Rainbow Dark',
+    category: 'rainbow',
+    colors: {
+      '--bg-primary': '#0a0a0a',
+      '--bg-secondary': '#1a1a1a',
+      '--bg-elevated': '#121212',
+      '--bg-card': '#212121',
+      '--text-primary': '#ffffff',
+      '--text-secondary': '#e0e0e0',
+      '--text-muted': '#a0a0a0',
+      '--accent-primary': '#e6261f',
+      '--accent-secondary': '#f7d038',
+      '--accent-tertiary': '#34bbe6',
+      '--success': '#a3e048',
+      '--error': '#e6261f',
+      '--warning': '#eb7532',
+      '--border-subtle': '#49da9a',
+      '--border-medium': '#d23be7',
+    }
+  },
+
+  rainbowPastel: {
+    name: 'Rainbow Pastel',
+    category: 'rainbow',
+    colors: {
+      '--bg-primary': '#fffbf8',
+      '--bg-secondary': '#fff5f0',
+      '--bg-elevated': '#fffefe',
+      '--bg-card': '#fff0eb',
+      '--text-primary': '#2d2424',
+      '--text-secondary': '#5a4848',
+      '--text-muted': '#8a7070',
+      '--accent-primary': '#ff9aa2',
+      '--accent-secondary': '#ffdac1',
+      '--accent-tertiary': '#b5ead7',
+      '--success': '#caffbf',
+      '--error': '#ffb7b2',
+      '--warning': '#ffdac1',
+      '--border-subtle': '#c7ceea',
+      '--border-medium': '#e2f0cb',
+    }
+  },
+
+  rainbowNeon: {
+    name: 'Rainbow Neon',
+    category: 'rainbow',
+    colors: {
+      '--bg-primary': '#000000',
+      '--bg-secondary': '#0d0d0d',
+      '--bg-elevated': '#050505',
+      '--bg-card': '#1a1a1a',
+      '--text-primary': '#ffffff',
+      '--text-secondary': '#f0f0f0',
+      '--text-muted': '#b0b0b0',
+      '--accent-primary': '#ff0080',
+      '--accent-secondary': '#00ff80',
+      '--accent-tertiary': '#00d4ff',
+      '--success': '#00ff80',
+      '--error': '#ff0080',
+      '--warning': '#ffff00',
+      '--border-subtle': '#ff00ff',
+      '--border-medium': '#00ffff',
+    }
+  },
+
+  rainbowGradient: {
+    name: 'Rainbow Gradient',
+    category: 'rainbow',
+    colors: {
+      '--bg-primary': '#f5f5f5',
+      '--bg-secondary': '#ebebeb',
+      '--bg-elevated': '#fafafa',
+      '--bg-card': '#e0e0e0',
+      '--text-primary': '#1a1a1a',
+      '--text-secondary': '#3d3d3d',
+      '--text-muted': '#707070',
+      '--accent-primary': '#ff5b5b',
+      '--accent-secondary': '#b8ff52',
+      '--accent-tertiary': '#9952e0',
+      '--success': '#52e0e0',
+      '--error': '#ff5b5b',
+      '--warning': '#ffc75d',
+      '--border-subtle': '#91f7ff',
+      '--border-medium': '#ff82d4',
+    }
+  },
+
+  // ===== NATURE THEMES =====
+  forestDeep: {
+    name: 'Forest Deep',
+    category: 'nature',
+    colors: {
+      '--bg-primary': '#1a2e1a',
+      '--bg-secondary': '#2d4529',
+      '--bg-elevated': '#243823',
+      '--bg-card': '#374f2f',
+      '--text-primary': '#e8f5e9',
+      '--text-secondary': '#c8e6c9',
+      '--text-muted': '#a5d6a7',
+      '--accent-primary': '#66bb6a',
+      '--accent-secondary': '#4caf50',
+      '--accent-tertiary': '#43a047',
+      '--success': '#81c784',
+      '--error': '#ef5350',
+      '--warning': '#ffa726',
+      '--border-subtle': '#4a6741',
+      '--border-medium': '#3f5a36',
+    }
+  },
+
+  forestLight: {
+    name: 'Forest Light',
+    category: 'nature',
+    colors: {
+      '--bg-primary': '#f1f8f4',
+      '--bg-secondary': '#e8f5e9',
+      '--bg-elevated': '#edf6f0',
+      '--bg-card': '#dcedc8',
+      '--text-primary': '#1b5e20',
+      '--text-secondary': '#2e7d32',
+      '--text-muted': '#4caf50',
+      '--accent-primary': '#66bb6a',
+      '--accent-secondary': '#4caf50',
+      '--accent-tertiary': '#388e3c',
+      '--success': '#66bb6a',
+      '--error': '#e57373',
+      '--warning': '#ffb74d',
+      '--border-subtle': '#a5d6a7',
+      '--border-medium': '#81c784',
+    }
+  },
+
+  meadow: {
+    name: 'Meadow',
+    category: 'nature',
+    colors: {
+      '--bg-primary': '#f9fdf7',
+      '--bg-secondary': '#e8f5e9',
+      '--bg-elevated': '#f1f9f3',
+      '--bg-card': '#dcedc8',
+      '--text-primary': '#33691e',
+      '--text-secondary': '#558b2f',
+      '--text-muted': '#689f38',
+      '--accent-primary': '#8bc34a',
+      '--accent-secondary': '#9ccc65',
+      '--accent-tertiary': '#7cb342',
+      '--success': '#9ccc65',
+      '--error': '#ef5350',
+      '--warning': '#ffca28',
+      '--border-subtle': '#aed581',
+      '--border-medium': '#9ccc65',
+    }
+  },
+
+  woodland: {
+    name: 'Woodland',
+    category: 'nature',
+    colors: {
+      '--bg-primary': '#f5f1e8',
+      '--bg-secondary': '#e8dcc8',
+      '--bg-elevated': '#f0e9dd',
+      '--bg-card': '#d9c7ae',
+      '--text-primary': '#304529',
+      '--text-secondary': '#4a6741',
+      '--text-muted': '#656d4a',
+      '--accent-primary': '#7f5539',
+      '--accent-secondary': '#a68a64',
+      '--accent-tertiary': '#656d4a',
+      '--success': '#7a9b6d',
+      '--error': '#a0522d',
+      '--warning': '#cd853f',
+      '--border-subtle': '#ede0d4',
+      '--border-medium': '#d9c7ae',
+    }
+  },
+
+  moss: {
+    name: 'Moss',
+    category: 'nature',
+    colors: {
+      '--bg-primary': '#f4f6f3',
+      '--bg-secondary': '#e5ebe3',
+      '--bg-elevated': '#eef2ed',
+      '--bg-card': '#d8e3d5',
+      '--text-primary': '#2d3a2e',
+      '--text-secondary': '#45503b',
+      '--text-muted': '#6c7c59',
+      '--accent-primary': '#8a9a5b',
+      '--accent-secondary': '#82a762',
+      '--accent-tertiary': '#6c7c59',
+      '--success': '#8bc34a',
+      '--error': '#c1666b',
+      '--warning': '#d4a574',
+      '--border-subtle': '#c5d5c2',
+      '--border-medium': '#b0c4ad',
+    }
+  },
+
+  sky: {
+    name: 'Sky',
+    category: 'nature',
+    colors: {
+      '--bg-primary': '#e3f2fd',
+      '--bg-secondary': '#bbdefb',
+      '--bg-elevated': '#d4ebf9',
+      '--bg-card': '#a8d5f7',
+      '--text-primary': '#01579b',
+      '--text-secondary': '#0277bd',
+      '--text-muted': '#0288d1',
+      '--accent-primary': '#03a9f4',
+      '--accent-secondary': '#29b6f6',
+      '--accent-tertiary': '#039be5',
+      '--success': '#66bb6a',
+      '--error': '#ef5350',
+      '--warning': '#ffa726',
+      '--border-subtle': '#64b5f6',
+      '--border-medium': '#42a5f5',
+    }
+  },
+
+  desert: {
+    name: 'Desert',
+    category: 'nature',
+    colors: {
+      '--bg-primary': '#fdf8f3',
+      '--bg-secondary': '#f7e9db',
+      '--bg-elevated': '#faf2e8',
+      '--bg-card': '#f0dfc8',
+      '--text-primary': '#4a3728',
+      '--text-secondary': '#6b5444',
+      '--text-muted': '#8b6f47',
+      '--accent-primary': '#d4a574',
+      '--accent-secondary': '#cd853f',
+      '--accent-tertiary': '#a0825a',
+      '--success': '#8bc34a',
+      '--error': '#d32f2f',
+      '--warning': '#f57c00',
+      '--border-subtle': '#e5d4c1',
+      '--border-medium': '#d9c7b0',
+    }
+  },
 };
 
 /**
@@ -791,6 +1057,8 @@ export function getThemesByCategory() {
     retro: [],
     neon: [],
     vintage: [],
+    rainbow: [],
+    nature: [],
     light: [],
     dark: [],
     accessible: [],

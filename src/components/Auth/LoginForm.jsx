@@ -34,15 +34,7 @@ export default function LoginForm() {
       navigate(from, { replace: true });
     } catch (err) {
       console.error('Login error:', err);
-      if (err.code === 'UserNotConfirmedException') {
-        navigate('/verify-email', { state: { email } });
-      } else if (err.code === 'NotAuthorizedException') {
-        setError('Incorrect email or password');
-      } else if (err.code === 'UserNotFoundException') {
-        setError('No account found with this email');
-      } else {
-        setError(err.message || 'Failed to sign in. Please try again.');
-      }
+      setError(err.message || 'Failed to sign in. Please try again.');
     } finally {
       setLoading(false);
     }

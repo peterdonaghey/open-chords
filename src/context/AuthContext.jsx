@@ -64,6 +64,7 @@ export function AuthProvider({ children }) {
   async function signUp(email, password) {
     try {
       const result = await authSignUp(email, password);
+      await checkAuth(); // Refresh user state after signup (custom auth logs in immediately)
       return result;
     } catch (error) {
       throw error;

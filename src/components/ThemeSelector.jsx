@@ -75,6 +75,8 @@ export default function ThemeSelector({ onDropdownChange }) {
     retro: '🕹️ Retro',
     neon: '⚡ Neon',
     vintage: '📜 Vintage',
+    rainbow: '🌈 Rainbow',
+    nature: '🌿 Nature',
     light: '☀️ Light',
     dark: '🌙 Dark',
     accessible: '♿ Accessible',
