@@ -19,7 +19,7 @@ dotenv.config({ path: '.env.local' });
 const scryptAsync = promisify(scrypt);
 
 const client = new DynamoDBClient({
-  region: process.env.AWS_REGION,
+  region: process.env.VITE_AWS_REGION,
   credentials: {
     accessKeyId: process.env.VITE_AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.VITE_AWS_SECRET_ACCESS_KEY,
@@ -43,7 +43,7 @@ async function seedAdmin() {
   const password = process.env.VITE_ADMIN_PASSWORD;
 
   if (!email || !password) {
-    console.error('❌ Missing ADMIN_EMAIL or ADMIN_PASSWORD in .env.local');
+    console.error('❌ Missing VITE_ADMIN_EMAIL or VITE_ADMIN_PASSWORD in .env.local');
     console.error('   Add these to your .env.local file:');
     console.error('   VITE_ADMIN_EMAIL=your-email@example.com');
     console.error('   VITE_ADMIN_PASSWORD=your-secure-password');
