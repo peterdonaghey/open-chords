@@ -155,9 +155,6 @@ function SongCard({ song, onSelect, onDelete, currentUser, isAuthenticated, isAd
         <h3 className="song-card-title">{song.title}</h3>
         <p className="song-card-artist">{song.artist}</p>
         <div className="song-card-meta">
-          {song.key && (
-            <span className="song-card-key">Key: {song.key}</span>
-          )}
           {song.ownerEmail && song.ownerEmail !== 'anonymous' && (
             <span className="song-card-owner">
               {isOwner ? '👤 You' : `👤 ${song.ownerEmail}`}

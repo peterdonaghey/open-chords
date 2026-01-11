@@ -11,7 +11,6 @@ function SongEditor({ song, onSave, onCancel }) {
   const { user, isAuthenticated } = useAuth();
   const [title, setTitle] = useState(song?.title || '');
   const [artist, setArtist] = useState(song?.artist || '');
-  const [key, setKey] = useState(song?.key || 'C');
   const [type, setType] = useState(song?.type || 'chords');
   const [content, setContent] = useState(song?.content || '');
   const [showPreview, setShowPreview] = useState(false);
@@ -24,7 +23,6 @@ function SongEditor({ song, onSave, onCancel }) {
       id: song?.id || Date.now().toString(),
       title: title.trim(),
       artist: artist.trim(),
-      key,
       type,
       content,
       updatedAt: new Date().toISOString(),
@@ -94,52 +92,16 @@ function SongEditor({ song, onSave, onCancel }) {
             </div>
           </div>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="key">Key</label>
-              <select
-                id="key"
-                value={key}
-                onChange={(e) => setKey(e.target.value)}
-              >
-                <option value="C">C</option>
-                <option value="C#">C#</option>
-                <option value="Db">Db</option>
-                <option value="D">D</option>
-                <option value="D#">D#</option>
-                <option value="Eb">Eb</option>
-                <option value="E">E</option>
-                <option value="F">F</option>
-                <option value="F#">F#</option>
-                <option value="Gb">Gb</option>
-                <option value="G">G</option>
-                <option value="G#">G#</option>
-                <option value="Ab">Ab</option>
-                <option value="A">A</option>
-                <option value="A#">A#</option>
-                <option value="Bb">Bb</option>
-                <option value="B">B</option>
-                <option value="Am">Am</option>
-                <option value="Bm">Bm</option>
-                <option value="Cm">Cm</option>
-                <option value="Dm">Dm</option>
-                <option value="Em">Em</option>
-                <option value="Fm">Fm</option>
-                <option value="Gm">Gm</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="type">Type</label>
-              <select
-                id="type"
-                value={type}
-                onChange={(e) => setType(e.target.value)}
-              >
-                <option value="chords">Chords</option>
-                <option value="tabs">Tabs</option>
-              </select>
-            </div>
+          <div className="form-group">
+            <label htmlFor="type">Type</label>
+            <select
+              id="type"
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+            >
+              <option value="chords">Chords</option>
+              <option value="tabs">Tabs</option>
+            </select>
           </div>
 
           <div className="form-group">

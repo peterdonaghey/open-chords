@@ -123,13 +123,11 @@ class GitHubService {
       // Parse metadata from content
       const titleMatch = content.match(/^Title:\s*(.+)$/m);
       const artistMatch = content.match(/^Artist:\s*(.+)$/m);
-      const keyMatch = content.match(/^Key:\s*([A-G][#b]?m?)$/m);
 
       return {
         path,
         title: titleMatch ? titleMatch[1].trim() : path.split('/').pop().replace('.txt', ''),
         artist: artistMatch ? artistMatch[1].trim() : path.split('/')[1] || 'Unknown',
-        key: keyMatch ? keyMatch[1].trim() : null,
         sha: data.sha,
       };
     } catch (error) {
@@ -157,14 +155,12 @@ class GitHubService {
     // Parse metadata
     const titleMatch = content.match(/^Title:\s*(.+)$/m);
     const artistMatch = content.match(/^Artist:\s*(.+)$/m);
-    const keyMatch = content.match(/^Key:\s*([A-G][#b]?m?)$/m);
     const typeMatch = content.match(/^Type:\s*(chords|tabs)$/m);
 
     // Remove metadata lines from content
     const songContent = content
       .replace(/^Title:.*$/m, '')
       .replace(/^Artist:.*$/m, '')
-      .replace(/^Key:.*$/m, '')
       .replace(/^Type:.*$/m, '')
       .replace(/^\n+/, '');
 
@@ -172,7 +168,6 @@ class GitHubService {
       path,
       title: titleMatch ? titleMatch[1].trim() : 'Untitled',
       artist: artistMatch ? artistMatch[1].trim() : 'Unknown',
-      key: keyMatch ? keyMatch[1].trim() : 'C',
       type: typeMatch ? typeMatch[1] : 'chords',
       content: songContent,
       sha: data.sha,
@@ -195,7 +190,6 @@ class GitHubService {
     // Prepare content with metadata
     const content = `Title: ${song.title}
 Artist: ${song.artist}
-Key: ${song.key}
 Type: ${song.type}
 
 ${song.content}`;

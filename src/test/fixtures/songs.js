@@ -6,7 +6,6 @@ export const basicSong = {
   id: '1',
   title: 'Test Song',
   artist: 'Test Artist',
-  key: 'C',
   type: 'chords',
   content: `[Verse 1]
 C       G       Am      F
@@ -24,7 +23,6 @@ export const songWithComplexChords = {
   id: '2',
   title: 'Complex Chords Song',
   artist: 'Test Artist',
-  key: 'D',
   type: 'chords',
   content: `[Intro]
 Dmaj7   G#dim   Am7/E   F#m7b5
@@ -41,7 +39,6 @@ export const songWithFlats = {
   id: '3',
   title: 'Flat Key Song',
   artist: 'Test Artist',
-  key: 'Bb',
   type: 'chords',
   content: `[Verse]
 Bb      Eb      Cm      F
@@ -55,7 +52,6 @@ export const songWithSharps = {
   id: '4',
   title: 'Sharp Key Song',
   artist: 'Test Artist',
-  key: 'E',
   type: 'chords',
   content: `[Verse]
 E       A       C#m     B
@@ -69,7 +65,6 @@ export const emptySong = {
   id: '5',
   title: 'Empty Song',
   artist: 'Test Artist',
-  key: 'C',
   type: 'chords',
   content: '',
   createdAt: '2024-01-01T00:00:00.000Z',
@@ -81,7 +76,6 @@ export const anonymousSong = {
   id: '6',
   title: 'Anonymous Song',
   artist: 'Anonymous',
-  key: 'G',
   type: 'chords',
   content: `[Verse]
 G       D       Em      C

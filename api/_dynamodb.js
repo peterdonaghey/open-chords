@@ -91,7 +91,6 @@ export async function saveSong(userId, song, ownerEmail = 'anonymous') {
     songId: song.id,
     title: song.title,
     artist: song.artist,
-    key: song.key || '',
     content: song.content,
     createdAt: now,
     updatedAt: now,
@@ -119,14 +118,10 @@ export async function updateSong(userId, song) {
       userId,
       songId: song.id,
     },
-    UpdateExpression: 'SET title = :title, artist = :artist, #key = :key, content = :content, updatedAt = :updatedAt',
-    ExpressionAttributeNames: {
-      '#key': 'key', // 'key' is a reserved word in DynamoDB
-    },
+    UpdateExpression: 'SET title = :title, artist = :artist, content = :content, updatedAt = :updatedAt',
     ExpressionAttributeValues: {
       ':title': song.title,
       ':artist': song.artist,
-      ':key': song.key || '',
       ':content': song.content,
       ':updatedAt': now,
     },

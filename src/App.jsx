@@ -501,7 +501,7 @@ function ViewSongPage() {
 
   useEffect(() => {
     if (song) {
-      const transposed = transposeSong(song.content, currentTranspose, song.key);
+      const transposed = transposeSong(song.content, currentTranspose);
       setTransposedContent(transposed);
     }
   }, [currentTranspose, song]);

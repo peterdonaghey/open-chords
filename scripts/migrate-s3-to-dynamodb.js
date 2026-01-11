@@ -79,7 +79,6 @@ async function saveToDynamoDB(userId, song) {
     songId: song.id,
     title: song.title,
     artist: song.artist,
-    key: song.key || '',
     content: song.content,
     createdAt: song.createdAt || now,
     updatedAt: song.updatedAt || now,

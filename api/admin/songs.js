@@ -32,7 +32,6 @@ export default async function handler(req, res) {
         ownerEmail: song.ownerEmail || 'unknown',
         title: song.title,
         artist: song.artist,
-        key: song.key,
         createdAt: song.createdAt,
         updatedAt: song.updatedAt,
       }));

@@ -72,7 +72,6 @@ describe('storage service', () => {
         id: 'new-song-1',
         title: 'New Song',
         artist: 'New Artist',
-        key: 'C',
         type: 'chords',
         content: 'C G Am F\nTest lyrics',
       };
@@ -95,7 +94,6 @@ describe('storage service', () => {
         id: 'anonymous-song-1',
         title: 'Anonymous Song',
         artist: 'Anonymous',
-        key: 'G',
         type: 'chords',
         content: 'G D Em C\nAnonymous lyrics',
       };
@@ -111,7 +109,6 @@ describe('storage service', () => {
         id: 'complete-song',
         title: 'Complete Song',
         artist: 'Complete Artist',
-        key: 'D',
         type: 'chords',
         content: 'D A Bm G\nComplete content',
       };
@@ -121,7 +118,6 @@ describe('storage service', () => {
       expect(result.id).toBe('complete-song');
       expect(result.title).toBe('Complete Song');
       expect(result.artist).toBe('Complete Artist');
-      expect(result.key).toBe('D');
       expect(result.content).toBe('D A Bm G\nComplete content');
     });
   });
@@ -132,7 +128,6 @@ describe('storage service', () => {
         id: '1',
         title: 'Updated Title',
         artist: 'Updated Artist',
-        key: 'G',
         type: 'chords',
         content: 'G D Em C\nUpdated content',
       };
@@ -154,7 +149,6 @@ describe('storage service', () => {
         id: '1',
         title: 'Should Fail',
         artist: 'Should Fail',
-        key: 'C',
         type: 'chords',
         content: 'C G Am F',
       };
@@ -167,7 +161,6 @@ describe('storage service', () => {
         id: '1',
         title: 'Test Update',
         artist: 'Test Artist',
-        key: 'C',
         type: 'chords',
         content: 'C G Am F',
       };

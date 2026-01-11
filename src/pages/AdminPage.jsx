@@ -482,7 +482,6 @@ function AdminPage() {
                   </th>
                   <th>Title</th>
                   <th>Artist</th>
-                  <th>Key</th>
                   <th>Owner</th>
                   <th>Created</th>
                   <th>Actions</th>
@@ -500,7 +499,6 @@ function AdminPage() {
                     </td>
                     <td>{song.title}</td>
                     <td>{song.artist}</td>
-                    <td>{song.key || '-'}</td>
                     <td>
                       <span className="owner-email">{song.ownerEmail}</span>
                     </td>
@@ -553,7 +551,6 @@ function AdminPage() {
                   </th>
                   <th>Title</th>
                   <th>Artist</th>
-                  <th>Key</th>
                   <th>User ID</th>
                   <th>Owner Email</th>
                   <th>Actions</th>
@@ -571,7 +568,6 @@ function AdminPage() {
                     </td>
                     <td>{song.title}</td>
                     <td>{song.artist}</td>
-                    <td>{song.key || '-'}</td>
                     <td><code>{song.userId || 'missing'}</code></td>
                     <td>{song.ownerEmail || 'unknown'}</td>
                     <td>

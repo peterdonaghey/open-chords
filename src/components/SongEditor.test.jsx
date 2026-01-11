@@ -22,7 +22,6 @@ describe('SongEditor component', () => {
     expect(screen.getByText('New Song')).toBeInTheDocument();
     expect(screen.getByLabelText(/title/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/artist/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/key/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/song content/i)).toBeInTheDocument();
   });
 
@@ -31,7 +30,6 @@ describe('SongEditor component', () => {
       id: '1',
       title: 'Existing Song',
       artist: 'Existing Artist',
-      key: 'G',
       type: 'chords',
       content: 'G D Em C\nTest lyrics',
     };
@@ -75,16 +73,6 @@ describe('SongEditor component', () => {
     expect(contentInput).toHaveValue('C G Am F');
   });
 
-  it('should change key selection', async () => {
-    const user = userEvent.setup();
-    render(<SongEditor {...defaultProps} />);
-    
-    const keySelect = screen.getByLabelText(/key/i);
-    await user.selectOptions(keySelect, 'G');
-    
-    expect(keySelect).toHaveValue('G');
-  });
-
   it('should call onSave with song data on submit', async () => {
     const user = userEvent.setup();
     render(<SongEditor {...defaultProps} />);
@@ -100,7 +88,6 @@ describe('SongEditor component', () => {
         title: 'Test Song',
         artist: 'Test Artist',
         content: 'C G Am F\nLyrics',
-        key: 'C',
       })
     );
   });
@@ -162,7 +149,6 @@ describe('SongEditor component', () => {
       id: 'existing-id',
       title: 'Old Title',
       artist: 'Old Artist',
-      key: 'C',
       type: 'chords',
       content: 'Old content',
     };
@@ -179,18 +165,6 @@ describe('SongEditor component', () => {
         title: 'New Title',
       })
     );
-  });
-
-  it('should show all key options in dropdown', () => {
-    render(<SongEditor {...defaultProps} />);
-    
-    const keySelect = screen.getByLabelText(/key/i);
-    const options = keySelect.querySelectorAll('option');
-    
-    // Should have major and minor keys
-    expect(options.length).toBeGreaterThan(12);
-    expect(screen.getByRole('option', { name: 'C' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'Am' })).toBeInTheDocument();
   });
 
   it('should not show cancel button when onCancel not provided', () => {
