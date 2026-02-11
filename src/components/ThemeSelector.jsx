@@ -27,6 +27,9 @@ export default function ThemeSelector({ onDropdownChange }) {
       const allThemeKeys = getAllThemeKeys();
       const currentIndex = allThemeKeys.indexOf(currentTheme);
       
+      if (!isOpen) return;
+      if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') return;
+      
       if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
         event.preventDefault();
         const prevIndex = currentIndex > 0 ? currentIndex - 1 : allThemeKeys.length - 1;
