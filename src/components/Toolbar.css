@@ -15,7 +15,7 @@
 .toolbar-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0.5rem 1rem;
+  padding: 0.15rem 1rem;
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -212,7 +212,7 @@
   }
   
   .toolbar-container {
-    padding: 0.75rem 1rem;
+    padding: 0.15rem 1rem;
     gap: 1rem;
   }
 
@@ -232,7 +232,7 @@
 
 @media (max-width: 1024px) {
   .toolbar-container {
-    padding: 0.75rem 1rem;
+    padding: 0.15rem 1rem;
     gap: 1rem;
   }
 
