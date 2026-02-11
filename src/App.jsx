@@ -547,12 +547,16 @@ function ViewSongPage() {
     const handleKeyPress = (e) => {
       if (e.key === 'ArrowUp') {
         e.preventDefault();
-        const newTranspose = currentTranspose + 1;
-        setCurrentTranspose(newTranspose >= 12 ? newTranspose - 12 : newTranspose);
+        setCurrentTranspose(prev => {
+          const newTranspose = prev + 1;
+          return newTranspose >= 12 ? newTranspose - 12 : newTranspose;
+        });
       } else if (e.key === 'ArrowDown') {
         e.preventDefault();
-        const newTranspose = currentTranspose - 1;
-        setCurrentTranspose(newTranspose <= -12 ? newTranspose + 12 : newTranspose);
+        setCurrentTranspose(prev => {
+          const newTranspose = prev - 1;
+          return newTranspose <= -12 ? newTranspose + 12 : newTranspose;
+        });
       } else if (e.key === '0') {
         e.preventDefault();
         setCurrentTranspose(0);
@@ -561,7 +565,7 @@ function ViewSongPage() {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [currentTranspose]);
+  }, []);
 
   if (loading) {
     return <div className="loading">Loading...</div>;

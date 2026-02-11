@@ -6,7 +6,7 @@
 export const NOTES_SHARP = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 export const NOTES_FLAT = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
 
-// Common chord patterns (root note followed by quality)
+// Simple chord pattern: note (A-G) + optional (#/b) + quality
 const CHORD_REGEX = /^([A-G][#b]?)(.*)$/;
 
 /**
@@ -20,23 +20,18 @@ export function transposeChord(chord, semitones, useFlats = false) {
   if (!chord || chord.trim() === '') return chord;
 
   const match = chord.match(CHORD_REGEX);
-  if (!match) return chord; // Not a valid chord, return as-is
+  if (!match) return chord;
 
   const [, root, quality] = match;
   const noteScale = useFlats ? NOTES_FLAT : NOTES_SHARP;
 
-  // Find the root note in the scale
   let noteIndex = noteScale.indexOf(root);
-
-  // If not found, try the other scale
   if (noteIndex === -1) {
     const altScale = useFlats ? NOTES_SHARP : NOTES_FLAT;
     noteIndex = altScale.indexOf(root);
-    if (noteIndex === -1) return chord; // Invalid note
+    if (noteIndex === -1) return chord;
   }
 
-  // Transpose by semitones (modulo 12 for octave wrapping)
-  // Add multiple 12s to handle large negative numbers
   const newIndex = ((noteIndex + semitones) % 12 + 12) % 12;
   const newRoot = noteScale[newIndex];
 
@@ -91,7 +86,6 @@ export function getSemitoneDifference(fromNote, toNote) {
   if (fromIndex === -1 || toIndex === -1) return 0;
 
   let diff = toIndex - fromIndex;
-  // Handle wrapping
   if (diff < 0) diff += 12;
 
   return diff;
