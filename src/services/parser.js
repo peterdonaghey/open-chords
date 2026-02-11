@@ -160,22 +160,24 @@ export function formatToUGText(parsedLines) {
 
 /**
  * Reconstruct a chord line from chord positions
+ * Ensures chords don't overlap (adds space between if needed)
  */
 function reconstructChordLine(chords) {
   if (!chords || chords.length === 0) return '';
 
-  // Find the maximum position to determine line length
-  const maxPos = Math.max(...chords.map(c => c.position + c.chord.length));
-  const line = new Array(maxPos + 1).fill(' ');
+  // Sort by position and build string with proper spacing
+  const sorted = [...chords].sort((a, b) => a.position - b.position);
+  let result = '';
+  let currentPos = 0;
 
-  // Place each chord at its position
-  chords.forEach(({ chord, position }) => {
-    for (let i = 0; i < chord.length; i++) {
-      line[position + i] = chord[i];
-    }
+  sorted.forEach(({ chord, position }) => {
+    // Add spaces to reach the target position, but ensure at least 1 space between chords
+    const spacesNeeded = Math.max(position - currentPos, result.length > 0 ? 1 : 0);
+    result += ' '.repeat(spacesNeeded) + chord;
+    currentPos = position + chord.length;
   });
 
-  return line.join('');
+  return result;
 }
 
 /**
