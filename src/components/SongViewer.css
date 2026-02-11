@@ -105,6 +105,20 @@
   border-right: none;
 }
 
+/* Compact mode title and artist in first column */
+.song-line-compact-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.song-line-compact-artist {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
 .song-content.compact-grid .song-line,
 .song-content.compact-grid .chord-line,
 .song-content.compact-grid .lyric-line {

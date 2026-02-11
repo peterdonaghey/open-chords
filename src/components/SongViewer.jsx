@@ -107,33 +107,40 @@ function SongViewer({ songText, title, artist, isDoubleColumn = false }) {
     ));
   };
 
-  return (
-    <div className={`song-viewer ${isDoubleColumn ? 'compact-mode' : ''}`}>
-      {(title || artist) && (
-        <div className="song-header">
-          {title && <h1 className="song-title">{title}</h1>}
-          {artist && <h2 className="song-artist">{artist}</h2>}
-        </div>
-      )}
+   return (
+     <div className={`song-viewer ${isDoubleColumn ? 'compact-mode' : ''}`}>
+       {!isDoubleColumn && (title || artist) && (
+         <div className="song-header">
+           {title && <h1 className="song-title">{title}</h1>}
+           {artist && <h2 className="song-artist">{artist}</h2>}
+         </div>
+       )}
 
-      <div 
-        ref={contentRef}
-        className={`song-content ${isDoubleColumn ? 'compact-grid' : ''}`}
-      >
-        {isDoubleColumn && columns.length > 0 ? (
-          // Render columns in compact mode
-          columns.map((columnLines, colIndex) => (
-            <div key={colIndex} className="song-column">
-              {renderLines(columnLines)}
-            </div>
-          ))
-        ) : (
-          // Normal single column mode
-          renderLines(parsedLines)
-        )}
-      </div>
-    </div>
-  );
+       <div 
+         ref={contentRef}
+         className={`song-content ${isDoubleColumn ? 'compact-grid' : ''}`}
+       >
+         {isDoubleColumn && columns.length > 0 ? (
+           // Render columns in compact mode
+           columns.map((columnLines, colIndex) => (
+             <div key={colIndex} className="song-column">
+               {/* Add title/artist to first column only */}
+               {colIndex === 0 && (title || artist) && (
+                 <>
+                   {title && <div className="song-line song-line-compact-title">{title}</div>}
+                   {artist && <div className="song-line song-line-compact-artist">{artist}</div>}
+                 </>
+               )}
+               {renderLines(columnLines)}
+             </div>
+           ))
+         ) : (
+           // Normal single column mode
+           renderLines(parsedLines)
+         )}
+       </div>
+     </div>
+   );
 }
 
 /**
