@@ -450,8 +450,8 @@ function ViewSongPage() {
         return;
       }
       
-      // Show navbar when mouse is near top (expanded area to include dropdowns)
-      if (e.clientY < 400) { // Increased from 80 to account for dropdowns
+      // Show navbar when mouse is near top
+      if (e.clientY < 100) {
         setIsNavVisible(true);
         
         // Clear any existing timeout
@@ -465,7 +465,7 @@ function ViewSongPage() {
             setIsNavVisible(false);
           }
         }, 3000);
-      } else if (e.clientY > 400) {
+      } else if (e.clientY > 100) {
         // Hide immediately when mouse moves away from top area
         if (!hasDropdownOpen) {
           setIsNavVisible(false);
