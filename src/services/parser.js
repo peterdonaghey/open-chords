@@ -71,7 +71,8 @@ function isChordLine(line) {
   if (!line.trim()) return false;
 
   // Look for common chord patterns
-  const chordPattern = /\b[A-G][#b]?(m|maj|min|dim|aug|sus|add)?\d*\b/g;
+  // Use lookbehind/lookahead instead of \b because # is not a word character
+  const chordPattern = /(?<![A-Za-z])[A-G][#b]?(m|maj|min|dim|aug|sus|add)?\d*(?![A-Za-z#b])/g;
   const matches = line.match(chordPattern);
 
   if (!matches || matches.length === 0) return false;
@@ -91,7 +92,9 @@ function isChordLine(line) {
  * Returns array of {chord: string, position: number}
  */
 function extractChords(line) {
-  const chordPattern = /\b([A-G][#b]?(?:m|maj|min|dim|aug|sus|add)?\d*(?:\/[A-G][#b]?)?)\b/g;
+  // Use lookbehind/lookahead instead of \b word boundaries
+  // because \b doesn't work correctly with # (e.g., "F#" would only match "F")
+  const chordPattern = /(?<![A-Za-z])([A-G][#b]?(?:m|maj|min|dim|aug|sus|add)?\d*(?:\/[A-G][#b]?)?)(?![A-Za-z#b])/g;
   const chords = [];
   let match;
 
