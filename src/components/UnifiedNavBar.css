@@ -3,9 +3,11 @@
   display: flex;
   align-items: center;
   padding: 0.75rem 1.5rem;
+  padding-right: calc(1.5rem + 10px); /* Account for scrollbar */
   background: var(--bg-elevated); /* Use theme color */
   backdrop-filter: blur(12px);
   border-bottom: 2px solid var(--border-subtle); /* Use theme color */
+  border-right: 1px solid var(--border-subtle);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out, background 0.2s ease, border-color 0.2s ease;
   position: fixed;
@@ -14,6 +16,7 @@
   right: 0;
   z-index: 1000;
   min-height: 60px;
+  margin-right: 10px;
 }
 
 /* Normal mode (library pages) */
@@ -59,6 +62,7 @@
   flex: 0 0 auto;
   min-width: 200px;
   justify-content: flex-end;
+  margin-right: 0; /* Ensure no extra margin */
 }
 
 /* === LOGO === */
@@ -96,6 +100,15 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-right: 0.25rem;
+}
+
+.control-label-standalone {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-right: 0.5rem;
 }
 
 /* === BUTTONS === */
@@ -139,8 +152,10 @@
   background: var(--accent-secondary);
 }
 
+/* === REMOVE THIS === */
 /* Pin button - special styling */
 .pin-btn {
+  display: none;
   font-size: 1rem;
   padding: 0.4rem 0.6rem;
   min-width: auto;
@@ -149,6 +164,7 @@
 .pin-btn.active {
   background: var(--accent-primary);
 }
+/* === END === */
 
 /* Transpose buttons */
 .transpose-btn {
@@ -200,61 +216,6 @@
   color: #ef4444;
 }
 
-/* === SPEED SLIDER === */
-.speed-slider {
-  width: 100px;
-  height: 6px;
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 3px;
-  outline: none;
-  cursor: pointer;
-  appearance: none;
-}
-
-.speed-slider::-webkit-slider-thumb {
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  background: var(--accent-primary);
-  border-radius: 50%;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  transition: all 0.2s;
-}
-
-.speed-slider::-webkit-slider-thumb:hover {
-  transform: scale(1.1);
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
-}
-
-.speed-slider::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
-  background: var(--accent-primary);
-  border-radius: 50%;
-  border: none;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  transition: all 0.2s;
-}
-
-.speed-slider::-moz-range-thumb:hover {
-  transform: scale(1.1);
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
-}
-
-.speed-slider:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.speed-display {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  min-width: 28px;
-  font-family: 'IBM Plex Mono', monospace;
-  font-weight: 600;
-}
 
 /* === DIVIDER === */
 .divider {
@@ -289,10 +250,6 @@
     gap: 0.4rem;
   }
   
-  .speed-slider {
-    width: 70px;
-  }
-  
   .btn-label {
     display: none !important;
   }
@@ -325,10 +282,6 @@
     margin-top: 0.5rem;
     padding-top: 0.5rem;
     border-top: 1px solid var(--border-subtle);
-  }
-  
-  .speed-display {
-    display: none;
   }
   
   .divider {

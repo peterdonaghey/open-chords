@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UserMenu from './UserMenu';
 import ThemeSelector from './ThemeSelector';
@@ -14,15 +14,17 @@ export default function UnifiedNavBar({
   // Song view specific props
   transpose = 0,
   onTranspose,
-  isAutoScrolling = false,
-  onAutoScrollToggle,
-  autoScrollSpeed = 3,
-  onAutoScrollSpeedChange,
   isDoubleColumn = false,
   onDoubleColumnToggle,
   onEdit,
-  onBack,
+  // Auth and ownership for conditional edit button
+  user = null,
+  isAuthenticated = false,
+  songOwnerId = null,
+  songOwnerEmail = null,
   onDropdownChange, // Callback to notify parent when dropdown state changes
+  atTop = true, // When not compact and scrolled to top, show nav
+  onVisibilityChange, // Callback so parent can adjust padding
 }) {
   const navigate = useNavigate();
   const [isPinned, setIsPinned] = useState(false);
@@ -44,10 +46,24 @@ export default function UnifiedNavBar({
     return transpose > 0 ? `+${transpose}` : `${transpose}`;
   };
 
+  // Show navbar: pinned OR hover OR (non-compact only: when scrolled to top)
+  const shouldShow = mode === 'song-view'
+    ? (isPinned || isVisible || (atTop && !isDoubleColumn))
+    : true;
+
+  useEffect(() => {
+    if (mode === 'song-view') {
+      onVisibilityChange?.(shouldShow);
+    }
+  }, [mode, shouldShow, onVisibilityChange]);
+
+  // Check if user owns the song
+  const isOwner = isAuthenticated && (
+    (songOwnerId && user?.userId === songOwnerId) ||
+    (songOwnerEmail && user?.email === songOwnerEmail)
+  );
+
   if (mode === 'song-view') {
-    // Show navbar if pinned OR if mouse is hovering
-    const shouldShow = isPinned || isVisible;
-    
     return (
       <nav className={`unified-navbar song-view ${shouldShow ? 'visible' : 'hidden'}`}>
         <div className="navbar-section navbar-left">
@@ -64,70 +80,47 @@ export default function UnifiedNavBar({
           </button>
         </div>
 
-        <div className="navbar-section navbar-center">
-          {/* Transpose */}
-          <div className="control-group">
-            <span className="control-label">Transpose</span>
-            <button className="control-btn transpose-btn" onClick={handleTransposeDown} title="Transpose down (↓)">
-              <span className="btn-icon">−</span>
-            </button>
-            <span className={`transpose-display ${transpose !== 0 ? (transpose > 0 ? 'positive' : 'negative') : ''}`}>
-              {getTransposeDisplay()}
-            </span>
-            <button className="control-btn transpose-btn" onClick={handleTransposeUp} title="Transpose up (↑)">
-              <span className="btn-icon">+</span>
-            </button>
-          </div>
+        <div className="navbar-section navbar-right">
+          {/* Transpose label and controls */}
+          <span className="control-label-standalone">Transpose</span>
+          <button className="control-btn transpose-btn" onClick={handleTransposeDown} title="Transpose down (↓)">
+            <span className="btn-icon">−</span>
+          </button>
+          <span className={`transpose-display ${transpose !== 0 ? (transpose > 0 ? 'positive' : 'negative') : ''}`}>
+            {getTransposeDisplay()}
+          </span>
+          <button className="control-btn transpose-btn" onClick={handleTransposeUp} title="Transpose up (↑)">
+            <span className="btn-icon">+</span>
+          </button>
 
           <div className="divider" />
 
-          {/* Auto-scroll */}
-          <div className="control-group">
-            <span className="control-label">Auto-scroll</span>
-            <button 
-              className={`control-btn scroll-btn ${isAutoScrolling ? 'active' : ''}`}
-              onClick={onAutoScrollToggle}
-              disabled={isDoubleColumn}
-              title={isDoubleColumn ? "Disabled in compact mode" : "Toggle auto-scroll (Space)"}
-            >
-              <span className="btn-icon">{isAutoScrolling ? '⏸' : '▶'}</span>
-            </button>
-            <input 
-              type="range" 
-              min="1" 
-              max="10" 
-              value={autoScrollSpeed}
-              onChange={(e) => onAutoScrollSpeedChange(Number(e.target.value))}
-              className="speed-slider"
-              disabled={isDoubleColumn}
-              title="Scroll speed"
-            />
-            <span className="speed-display">{autoScrollSpeed}x</span>
-          </div>
-
-          <div className="divider" />
-
-          {/* Compact toggle */}
+          {/* View toggle */}
           <button 
             className={`control-btn layout-btn ${isDoubleColumn ? 'active' : ''}`}
             onClick={onDoubleColumnToggle}
             title={isDoubleColumn ? "Exit compact mode" : "Enter compact mode"}
           >
             <span className="btn-icon">{isDoubleColumn ? '📄' : '⚏'}</span>
-            <span className="btn-label">Compact</span>
+            <span className="btn-label">View</span>
           </button>
-        </div>
 
-        <div className="navbar-section navbar-right">
+          <div className="divider" />
+
           <ThemeSelector onDropdownChange={onDropdownChange} />
-          <button className="control-btn action-btn" onClick={onEdit} title="Edit song">
-            <span className="btn-icon">✏️</span>
-            <span className="btn-label">Edit</span>
-          </button>
-          <button className="control-btn action-btn" onClick={onBack} title="Back to library">
-            <span className="btn-icon">◀</span>
-            <span className="btn-label">Back</span>
-          </button>
+
+          <div className="divider" />
+
+          {isOwner && (
+            <>
+              <button className="control-btn action-btn" onClick={onEdit} title="Edit song">
+                <span className="btn-icon">✏️</span>
+                <span className="btn-label">Edit</span>
+              </button>
+              <div className="divider" />
+            </>
+          )}
+
           <UserMenu onDropdownChange={onDropdownChange} />
         </div>
       </nav>

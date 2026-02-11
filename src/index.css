@@ -101,10 +101,12 @@ select:focus-visible {
 }
 
 ::-webkit-scrollbar-track {
+  z-index: 1000;
   background: var(--bg-secondary);
 }
 
 ::-webkit-scrollbar-thumb {
+  z-index: 1000;
   background: var(--border-medium);
   border-radius: 5px;
   border: 2px solid var(--bg-secondary);

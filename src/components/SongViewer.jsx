@@ -108,6 +108,8 @@ function SongViewer({ songText, title, artist, isDoubleColumn = false }) {
   };
 
    return (
+    <div className={`song-viewer-container`}>
+      
      <div className={`song-viewer ${isDoubleColumn ? 'compact-mode' : ''}`}>
        {!isDoubleColumn && (title || artist) && (
          <div className="song-header">
@@ -140,6 +142,8 @@ function SongViewer({ songText, title, artist, isDoubleColumn = false }) {
          )}
        </div>
      </div>
+
+    </div>
    );
 }
 

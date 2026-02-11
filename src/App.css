@@ -19,26 +19,21 @@
 .view-song-page .view-song-container {
   flex: 1;
   overflow: auto;
-  padding-top: 60px; /* Space for navbar when visible/pinned */
+  padding-top: 0; /* No gap when nav hidden */
 }
 
-/* When in compact mode, remove padding to maximize space */
+/* When nav visible (at top or hover), add space so content isn't behind it */
+.view-song-page.nav-visible .view-song-container:not(.compact-mode) {
+  padding-top: 60px;
+}
+
+/* Compact mode: no padding, nav overlays on hover */
 .view-song-page .view-song-container.compact-mode {
   padding-top: 0;
   overflow: hidden; /* Compact mode has its own scroll handling */
 }
 
-/* === OLD STYLES TO BE CLEANED UP === */
-.app-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 1.5rem;
-  background: var(--bg-elevated);
-  border-bottom: 1px solid var(--border-subtle);
-  box-shadow: var(--shadow-sm);
-  transition: transform 0.3s ease-in-out, padding 0.3s ease-in-out, opacity 0.3s ease-in-out;
-}
+
 
 /* Compact header for song view */
 .app-header.compact {

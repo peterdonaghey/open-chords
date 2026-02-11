@@ -21,23 +21,27 @@
 }
 
 .user-avatar {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-tertiary) 100%);
-  color: var(--bg-primary);
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
-  font-size: 15px;
+  font-weight: 600;
+  font-size: 14px;
   font-family: 'IBM Plex Mono', monospace;
-  box-shadow: 0 2px 8px rgba(232, 168, 124, 0.25);
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   transition: all 0.2s;
 }
 
 .user-menu-button:hover .user-avatar {
-  box-shadow: 0 4px 16px rgba(232, 168, 124, 0.35);
+  background: var(--bg-card);
+  border-color: var(--accent-primary);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
 }
 
 .user-menu-dropdown {

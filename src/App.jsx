@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -14,7 +14,6 @@ import LoginModal from './components/Auth/LoginModal';
 import AdminPage from './pages/AdminPage';
 import ProfilePage from './pages/ProfilePage';
 import { transposeSong } from './services/transposer';
-import { useAutoScroll } from './hooks/useAutoScroll';
 import { getAllSongs, getSong, createSong, updateSong, deleteSong } from './services/storage';
 import './App.css';
 
@@ -432,12 +431,26 @@ function ViewSongPage() {
   const [currentTranspose, setCurrentTranspose] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [autoScrollSpeed, setAutoScrollSpeed] = useState(3);
   const [isDoubleColumn, setIsDoubleColumn] = useState(false);
   const [isNavVisible, setIsNavVisible] = useState(false);
   const [hasDropdownOpen, setHasDropdownOpen] = useState(false);
-  
-  const { isScrolling, toggle: toggleAutoScroll } = useAutoScroll(true, autoScrollSpeed);
+  const [isAtTop, setIsAtTop] = useState(true);
+  const [navActuallyVisible, setNavActuallyVisible] = useState(true); // for padding
+  const scrollContainerRef = useRef(null);
+
+  // Scroll tracking (non-compact only): nav sticks at top, hides when scrolled, shows on hover
+  useEffect(() => {
+    if (isDoubleColumn) return; // compact mode: hover-to-show only, no scroll tracking
+    const el = scrollContainerRef.current;
+    if (!el) return;
+
+    const checkScroll = () => {
+      setIsAtTop(el.scrollTop < 80);
+    };
+    checkScroll(); // initial
+    el.addEventListener('scroll', checkScroll);
+    return () => el.removeEventListener('scroll', checkScroll);
+  }, [isDoubleColumn, song]); // Re-run when song loads (ref becomes available)
 
   // Mouse tracking for auto-hide navbar - but stay visible if dropdown is open
   useEffect(() => {
@@ -538,10 +551,6 @@ function ViewSongPage() {
     navigate(`/song/edit/${song.id}`);
   };
 
-  const handleBack = () => {
-    navigate('/songs');
-  };
-
   useEffect(() => {
     // Keyboard shortcuts
     const handleKeyPress = (e) => {
@@ -586,24 +595,28 @@ function ViewSongPage() {
   }
 
   return (
-    <div className="view-song-page">
+    <div className={`view-song-page ${navActuallyVisible ? 'nav-visible' : ''}`}>
       <UnifiedNavBar
         mode="song-view"
         isVisible={isNavVisible}
+        atTop={isAtTop}
+        isDoubleColumn={isDoubleColumn}
+        onVisibilityChange={setNavActuallyVisible}
         transpose={currentTranspose}
         onTranspose={handleTranspose}
-        isAutoScrolling={isScrolling}
-        onAutoScrollToggle={toggleAutoScroll}
-        autoScrollSpeed={autoScrollSpeed}
-        onAutoScrollSpeedChange={setAutoScrollSpeed}
-        isDoubleColumn={isDoubleColumn}
         onDoubleColumnToggle={() => setIsDoubleColumn(prev => !prev)}
         onEdit={handleEdit}
-        onBack={handleBack}
+        user={user}
+        isAuthenticated={isAuthenticated}
+        songOwnerId={song?.userId}
+        songOwnerEmail={song?.ownerEmail}
         onDropdownChange={setHasDropdownOpen}
       />
 
-      <div className={`view-song-container ${isDoubleColumn ? 'compact-mode' : ''}`}>
+      <div
+        ref={scrollContainerRef}
+        className={`view-song-container ${isDoubleColumn ? 'compact-mode' : ''}`}
+      >
         <SongViewer
           songText={transposedContent}
           title={song.title}
