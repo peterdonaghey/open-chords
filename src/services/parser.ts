@@ -1,4 +1,5 @@
 import { transposeChord, keyUsesFlats } from '../utils/chords';
+import type { ParsedLine, ChordPosition } from '../types/song';
 
 /**
  * Parse Ultimate Guitar format song text
@@ -8,14 +9,12 @@ import { transposeChord, keyUsesFlats } from '../utils/chords';
 
 /**
  * Parse a song in Ultimate Guitar format
- * @param {string} text - Raw song text
- * @returns {Array<Object>} - Array of parsed lines with type and content
  */
-export function parseUGFormat(text) {
+export function parseUGFormat(text: string | null | undefined): ParsedLine[] {
   if (!text) return [];
 
   const lines = text.split('\n');
-  const parsed = [];
+  const parsed: ParsedLine[] = [];
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
@@ -63,39 +62,24 @@ export function parseUGFormat(text) {
   return parsed;
 }
 
-/**
- * Check if a line contains chords
- * Heuristic: Line has chord-like patterns and mostly spaces between them
- */
-function isChordLine(line) {
+function isChordLine(line: string): boolean {
   if (!line.trim()) return false;
 
-  // Look for common chord patterns
-  // Use lookbehind/lookahead instead of \b because # is not a word character
   const chordPattern = /(?<![A-Za-z])[A-G][#b]?(m|maj|min|dim|aug|sus|add)?\d*(?![A-Za-z#b])/g;
   const matches = line.match(chordPattern);
 
   if (!matches || matches.length === 0) return false;
 
-  // Check if the line is mostly chords and spaces (not continuous text)
   const totalLength = line.length;
   const chordLength = matches.join('').length;
   const ratio = chordLength / totalLength;
 
-  // If chords make up less than 30% and there are lots of characters,
-  // it's probably lyrics with some chord-like words
   return ratio > 0.15 || line.trim().split(/\s+/).length <= 6;
 }
 
-/**
- * Extract chord positions from a chord line
- * Returns array of {chord: string, position: number}
- */
-function extractChords(line) {
-  // Use lookbehind/lookahead instead of \b word boundaries
-  // because \b doesn't work correctly with # (e.g., "F#" would only match "F")
+function extractChords(line: string): ChordPosition[] {
   const chordPattern = /(?<![A-Za-z])([A-G][#b]?(?:m|maj|min|dim|aug|sus|add)?\d*(?:\/[A-G][#b]?)?)(?![A-Za-z#b])/g;
-  const chords = [];
+  const chords: ChordPosition[] = [];
   let match;
 
   while ((match = chordPattern.exec(line)) !== null) {
@@ -110,15 +94,15 @@ function extractChords(line) {
 
 /**
  * Transpose all chords in a parsed song
- * @param {Array<Object>} parsedLines - Parsed song lines
- * @param {number} semitones - Number of semitones to transpose
- * @param {string} originalKey - Original key signature (optional)
- * @returns {Array<Object>} - Transposed parsed lines
  */
-export function transposeParsedSong(parsedLines, semitones, originalKey = null) {
+export function transposeParsedSong(
+  parsedLines: ParsedLine[],
+  semitones: number,
+  originalKey: string | null = null
+): ParsedLine[] {
   const useFlats = originalKey ? keyUsesFlats(originalKey) : false;
 
-  return parsedLines.map(line => {
+  return parsedLines.map((line) => {
     if (line.type === 'chord-line') {
       return {
         ...line,
@@ -134,17 +118,14 @@ export function transposeParsedSong(parsedLines, semitones, originalKey = null) 
 
 /**
  * Format parsed lines back to Ultimate Guitar format text
- * @param {Array<Object>} parsedLines - Parsed song lines
- * @returns {string} - Formatted song text
  */
-export function formatToUGText(parsedLines) {
+export function formatToUGText(parsedLines: ParsedLine[]): string {
   return parsedLines
-    .map(line => {
+    .map((line) => {
       switch (line.type) {
         case 'section':
           return line.content;
         case 'chord-line':
-          // Reconstruct chord line with proper spacing
           const chordLine = reconstructChordLine(line.chords);
           return chordLine + '\n' + line.lyrics;
         case 'lyric':
@@ -158,20 +139,14 @@ export function formatToUGText(parsedLines) {
     .join('\n');
 }
 
-/**
- * Reconstruct a chord line from chord positions
- * Ensures chords don't overlap (adds space between if needed)
- */
-function reconstructChordLine(chords) {
+function reconstructChordLine(chords: ChordPosition[]): string {
   if (!chords || chords.length === 0) return '';
 
-  // Sort by position and build string with proper spacing
   const sorted = [...chords].sort((a, b) => a.position - b.position);
   let result = '';
   let currentPos = 0;
 
   sorted.forEach(({ chord, position }) => {
-    // Add spaces to reach the target position, but ensure at least 1 space between chords
     const spacesNeeded = Math.max(position - currentPos, result.length > 0 ? 1 : 0);
     result += ' '.repeat(spacesNeeded) + chord;
     currentPos = position + chord.length;
@@ -180,12 +155,17 @@ function reconstructChordLine(chords) {
   return result;
 }
 
+export interface ExtractedMetadata {
+  title: string | null;
+  artist: string | null;
+  key: string | null;
+}
+
 /**
  * Extract metadata from song text (title, artist, key)
- * Looks for patterns like "Title: Song Name" or "Artist: Artist Name"
  */
-export function extractMetadata(text) {
-  const metadata = {
+export function extractMetadata(text: string): ExtractedMetadata {
+  const metadata: ExtractedMetadata = {
     title: null,
     artist: null,
     key: null,

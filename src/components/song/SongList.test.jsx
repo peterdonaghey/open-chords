@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '../test/utils/test-utils';
+import { render, screen } from '../../test/utils/test-utils';
 import userEvent from '@testing-library/user-event';
 import SongList from './SongList';
-import { allSongs } from '../test/fixtures/songs';
+import { allSongs } from '../../test/fixtures/songs';
 
 describe('SongList component', () => {
   const mockOnSelectSong = vi.fn();

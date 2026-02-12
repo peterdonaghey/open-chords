@@ -14,14 +14,14 @@ export default defineConfig({
       exclude: [
         'node_modules/',
         'src/test/',
-        '**/*.test.{js,jsx}',
-        '**/*.spec.{js,jsx}',
+        '**/*.test.{js,jsx,ts,tsx}',
+        '**/*.spec.{js,jsx,ts,tsx}',
         '**/dist/',
         'e2e/',
-        'api/_*.js', // Exclude utility files from coverage
+        'api/_*.js',
       ],
     },
-    include: ['src/**/*.test.{js,jsx}', 'api/**/*.test.js'],
+    include: ['src/**/*.test.{js,jsx,ts,tsx}', 'api/**/*.test.js'],
   },
   resolve: {
     alias: {
@@ -29,4 +29,3 @@ export default defineConfig({
     },
   },
 });
-

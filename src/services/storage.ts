@@ -4,19 +4,16 @@
  */
 
 import { getIdToken } from './auth';
+import type { Song } from '../types/song';
 
-// API works on all domains - production, vercel previews, and local dev
 const API_BASE = import.meta.env.DEV ? 'https://open-chords.org/api' : '/api';
 
-/**
- * Get authorization headers with JWT token
- */
-async function getAuthHeaders() {
+async function getAuthHeaders(): Promise<Record<string, string>> {
   try {
     const token = await getIdToken();
     return {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     };
   } catch (error) {
     console.error('Error getting auth token:', error);
@@ -24,25 +21,18 @@ async function getAuthHeaders() {
   }
 }
 
-/**
- * Handle API response errors
- */
-function handleResponse(response) {
+function handleResponse(response: Response): Response {
   if (response.status === 401) {
-    // Redirect to login on unauthorized
     window.location.href = '/login';
     throw new Error('Unauthorized - please sign in');
   }
   return response;
 }
 
-/**
- * Get all songs (PUBLIC - no auth required)
- */
-export async function getAllSongs() {
+export async function getAllSongs(): Promise<Song[]> {
   try {
     const response = await fetch(`${API_BASE}/songs`);
-    
+
     if (!response.ok) {
       throw new Error(`Failed to fetch songs: ${response.statusText}`);
     }
@@ -53,13 +43,10 @@ export async function getAllSongs() {
   }
 }
 
-/**
- * Get a specific song by ID (PUBLIC - no auth required)
- */
-export async function getSong(id) {
+export async function getSong(id: string): Promise<Song | null> {
   try {
     const response = await fetch(`${API_BASE}/songs/${id}`);
-    
+
     if (response.status === 404) {
       return null;
     }
@@ -73,27 +60,22 @@ export async function getSong(id) {
   }
 }
 
-/**
- * Create a new song (AUTH OPTIONAL - can create anonymously)
- */
-export async function createSong(song) {
+export async function createSong(song: Song): Promise<Song> {
   try {
-    // Try to get auth headers, but don't fail if user not logged in
-    let headers = { 'Content-Type': 'application/json' };
+    let headers: Record<string, string> = { 'Content-Type': 'application/json' };
     try {
       const token = await getIdToken();
       headers['Authorization'] = `Bearer ${token}`;
-    } catch (error) {
-      // No auth token - will create as anonymous
+    } catch {
       console.log('Creating song anonymously (not logged in)');
     }
-    
+
     const response = await fetch(`${API_BASE}/songs`, {
       method: 'POST',
       headers,
       body: JSON.stringify(song),
     });
-    
+
     if (!response.ok) {
       throw new Error(`Failed to create song: ${response.statusText}`);
     }
@@ -104,10 +86,7 @@ export async function createSong(song) {
   }
 }
 
-/**
- * Update an existing song (AUTH REQUIRED)
- */
-export async function updateSong(song) {
+export async function updateSong(song: Song): Promise<Song> {
   try {
     const headers = await getAuthHeaders();
     const response = await fetch(`${API_BASE}/songs/${song.id}`, {
@@ -115,10 +94,9 @@ export async function updateSong(song) {
       headers,
       body: JSON.stringify(song),
     });
-    
-    // Check for auth errors first
+
     handleResponse(response);
-    
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ error: response.statusText }));
       const errorMsg = errorData.error || errorData.message || response.statusText;
@@ -131,20 +109,16 @@ export async function updateSong(song) {
   }
 }
 
-/**
- * Delete a song (AUTH REQUIRED)
- */
-export async function deleteSong(id) {
+export async function deleteSong(id: string): Promise<Song> {
   try {
     const headers = await getAuthHeaders();
     const response = await fetch(`${API_BASE}/songs/${id}`, {
       method: 'DELETE',
       headers,
     });
-    
-    // Check for auth errors first, before checking response.ok
+
     handleResponse(response);
-    
+
     if (!response.ok) {
       throw new Error(`Failed to delete song: ${response.statusText}`);
     }

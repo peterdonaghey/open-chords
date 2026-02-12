@@ -3,20 +3,21 @@
  */
 
 // Chromatic scale with sharps and flats
-export const NOTES_SHARP = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-export const NOTES_FLAT = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+export const NOTES_SHARP: readonly string[] = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+export const NOTES_FLAT: readonly string[] = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
 
 // Simple chord pattern: note (A-G) + optional (#/b) + quality
 const CHORD_REGEX = /^([A-G][#b]?)(.*)$/;
 
+export interface ParsedChord {
+  root: string;
+  quality: string;
+}
+
 /**
  * Transpose a single chord by a number of semitones
- * @param {string} chord - The chord to transpose (e.g., 'Am7', 'C#', 'Bb')
- * @param {number} semitones - Number of semitones to transpose (positive = up, negative = down)
- * @param {boolean} useFlats - Whether to use flats (true) or sharps (false) for accidentals
- * @returns {string} - The transposed chord
  */
-export function transposeChord(chord, semitones, useFlats = false) {
+export function transposeChord(chord: string, semitones: number, useFlats = false): string {
   if (!chord || chord.trim() === '') return chord;
 
   const match = chord.match(CHORD_REGEX);
@@ -40,20 +41,16 @@ export function transposeChord(chord, semitones, useFlats = false) {
 
 /**
  * Detect if a key signature typically uses flats or sharps
- * @param {string} key - The key signature (e.g., 'C', 'Am', 'Eb')
- * @returns {boolean} - True if key uses flats, false if sharps
  */
-export function keyUsesFlats(key) {
+export function keyUsesFlats(key: string): boolean {
   const flatKeys = ['F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb', 'Cb', 'Dm', 'Gm', 'Cm', 'Fm', 'Bbm', 'Ebm'];
   return flatKeys.some(flatKey => key.startsWith(flatKey));
 }
 
 /**
  * Parse a chord to extract root note and quality
- * @param {string} chord - The chord to parse
- * @returns {{root: string, quality: string} | null} - Parsed chord or null
  */
-export function parseChord(chord) {
+export function parseChord(chord: string): ParsedChord | null {
   const match = chord.match(CHORD_REGEX);
   if (!match) return null;
 
@@ -63,20 +60,15 @@ export function parseChord(chord) {
 
 /**
  * Validate if a string is a valid chord
- * @param {string} chord - The chord to validate
- * @returns {boolean} - True if valid chord
  */
-export function isValidChord(chord) {
+export function isValidChord(chord: string): boolean {
   return CHORD_REGEX.test(chord);
 }
 
 /**
  * Get the semitone difference between two notes
- * @param {string} fromNote - Starting note
- * @param {string} toNote - Target note
- * @returns {number} - Semitone difference
  */
-export function getSemitoneDifference(fromNote, toNote) {
+export function getSemitoneDifference(fromNote: string, toNote: string): number {
   let fromIndex = NOTES_SHARP.indexOf(fromNote);
   if (fromIndex === -1) fromIndex = NOTES_FLAT.indexOf(fromNote);
 

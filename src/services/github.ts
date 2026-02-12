@@ -1,30 +1,38 @@
 import { Octokit } from '@octokit/rest';
+import type { Song } from '../types/song';
+
+interface GitHubFile {
+  type: string;
+  name: string;
+  path: string;
+  content?: string;
+  sha?: string;
+}
+
+interface GitHubDirItem extends GitHubFile {
+  type: 'dir';
+}
+
+interface GitHubFileItem extends GitHubFile {
+  type: 'file';
+  content: string;
+  sha: string;
+}
 
 /**
  * GitHub service for storing and retrieving songs
- * Requires GitHub personal access token with repo scope
  */
-
 class GitHubService {
-  constructor() {
-    this.octokit = null;
-    this.owner = null;
-    this.repo = null;
-    this.authenticated = false;
-  }
+  private octokit: Octokit | null = null;
+  private owner: string | null = null;
+  private repo: string | null = null;
+  private authenticated = false;
 
-  /**
-   * Initialize GitHub client with token
-   * @param {string} token - GitHub personal access token
-   * @param {string} owner - Repository owner (username)
-   * @param {string} repo - Repository name
-   */
-  async init(token, owner, repo) {
+  async init(token: string, owner: string, repo: string): Promise<boolean> {
     this.octokit = new Octokit({ auth: token });
     this.owner = owner;
     this.repo = repo;
 
-    // Verify authentication
     try {
       await this.octokit.users.getAuthenticated();
       this.authenticated = true;
@@ -36,19 +44,14 @@ class GitHubService {
     }
   }
 
-  /**
-   * Check if service is authenticated
-   */
-  isAuthenticated() {
+  isAuthenticated(): boolean {
     return this.authenticated;
   }
 
-  /**
-   * List all songs in the repository
-   * @returns {Array<Object>} - Array of song metadata
-   */
-  async listSongs() {
-    if (!this.authenticated) throw new Error('Not authenticated');
+  async listSongs(): Promise<Array<{ path: string; title: string; artist: string; sha?: string }>> {
+    if (!this.authenticated || !this.octokit || !this.owner || !this.repo) {
+      throw new Error('Not authenticated');
+    }
 
     try {
       const { data } = await this.octokit.repos.getContent({
@@ -57,10 +60,10 @@ class GitHubService {
         path: 'songs',
       });
 
-      const songs = [];
+      const songs: Array<{ path: string; title: string; artist: string; sha?: string }> = [];
+      const items = Array.isArray(data) ? data : [data];
 
-      // Recursively get all song files
-      for (const item of data) {
+      for (const item of items as GitHubDirItem[]) {
         if (item.type === 'dir') {
           const artistSongs = await this.getSongsInDirectory(item.path);
           songs.push(...artistSongs);
@@ -71,29 +74,30 @@ class GitHubService {
       }
 
       return songs;
-    } catch (error) {
-      if (error.status === 404) {
-        // songs directory doesn't exist yet
+    } catch (error: unknown) {
+      if (typeof error === 'object' && error !== null && 'status' in error && error.status === 404) {
         return [];
       }
       throw error;
     }
   }
 
-  /**
-   * Get songs in a directory
-   */
-  async getSongsInDirectory(path) {
+  private async getSongsInDirectory(
+    dirPath: string
+  ): Promise<Array<{ path: string; title: string; artist: string; sha?: string }>> {
+    if (!this.octokit || !this.owner || !this.repo) return [];
+
     try {
       const { data } = await this.octokit.repos.getContent({
         owner: this.owner,
         repo: this.repo,
-        path,
+        path: dirPath,
       });
 
-      const songs = [];
+      const songs: Array<{ path: string; title: string; artist: string; sha?: string }> = [];
+      const items = Array.isArray(data) ? data : [data];
 
-      for (const item of data) {
+      for (const item of items as GitHubFileItem[]) {
         if (item.type === 'file' && item.name.endsWith('.txt')) {
           const songData = await this.getSongMetadata(item.path);
           if (songData) songs.push(songData);
@@ -102,15 +106,16 @@ class GitHubService {
 
       return songs;
     } catch (error) {
-      console.error(`Error getting songs in ${path}:`, error);
+      console.error(`Error getting songs in ${dirPath}:`, error);
       return [];
     }
   }
 
-  /**
-   * Get song metadata from file path
-   */
-  async getSongMetadata(path) {
+  private async getSongMetadata(
+    path: string
+  ): Promise<{ path: string; title: string; artist: string; sha?: string } | null> {
+    if (!this.octokit || !this.owner || !this.repo) return null;
+
     try {
       const { data } = await this.octokit.repos.getContent({
         owner: this.owner,
@@ -118,17 +123,16 @@ class GitHubService {
         path,
       });
 
-      const content = Buffer.from(data.content, 'base64').toString('utf-8');
-
-      // Parse metadata from content
+      const fileData = data as GitHubFileItem;
+      const content = Buffer.from(fileData.content, 'base64').toString('utf-8');
       const titleMatch = content.match(/^Title:\s*(.+)$/m);
       const artistMatch = content.match(/^Artist:\s*(.+)$/m);
 
       return {
         path,
-        title: titleMatch ? titleMatch[1].trim() : path.split('/').pop().replace('.txt', ''),
-        artist: artistMatch ? artistMatch[1].trim() : path.split('/')[1] || 'Unknown',
-        sha: data.sha,
+        title: titleMatch ? titleMatch[1].trim() : path.split('/').pop()?.replace('.txt', '') ?? '',
+        artist: artistMatch ? artistMatch[1].trim() : path.split('/')[1] ?? 'Unknown',
+        sha: fileData.sha,
       };
     } catch (error) {
       console.error(`Error getting metadata for ${path}:`, error);
@@ -136,13 +140,10 @@ class GitHubService {
     }
   }
 
-  /**
-   * Get full song content
-   * @param {string} path - File path in repository
-   * @returns {Object} - Song data
-   */
-  async getSong(path) {
-    if (!this.authenticated) throw new Error('Not authenticated');
+  async getSong(path: string): Promise<Partial<Song> & { path: string; sha?: string }> {
+    if (!this.authenticated || !this.octokit || !this.owner || !this.repo) {
+      throw new Error('Not authenticated');
+    }
 
     const { data } = await this.octokit.repos.getContent({
       owner: this.owner,
@@ -150,14 +151,12 @@ class GitHubService {
       path,
     });
 
-    const content = Buffer.from(data.content, 'base64').toString('utf-8');
-
-    // Parse metadata
+    const fileData = data as GitHubFileItem;
+    const content = Buffer.from(fileData.content, 'base64').toString('utf-8');
     const titleMatch = content.match(/^Title:\s*(.+)$/m);
     const artistMatch = content.match(/^Artist:\s*(.+)$/m);
     const typeMatch = content.match(/^Type:\s*(chords|tabs)$/m);
 
-    // Remove metadata lines from content
     const songContent = content
       .replace(/^Title:.*$/m, '')
       .replace(/^Artist:.*$/m, '')
@@ -168,62 +167,52 @@ class GitHubService {
       path,
       title: titleMatch ? titleMatch[1].trim() : 'Untitled',
       artist: artistMatch ? artistMatch[1].trim() : 'Unknown',
-      type: typeMatch ? typeMatch[1] : 'chords',
+      type: (typeMatch ? typeMatch[1] : 'chords') as 'chords' | 'tabs',
       content: songContent,
-      sha: data.sha,
+      sha: fileData.sha,
     };
   }
 
-  /**
-   * Save a song to the repository
-   * @param {Object} song - Song data
-   * @returns {Object} - Updated song data with path and sha
-   */
-  async saveSong(song) {
-    if (!this.authenticated) throw new Error('Not authenticated');
+  async saveSong(song: Song): Promise<Song & { path: string; sha?: string }> {
+    if (!this.authenticated || !this.octokit || !this.owner || !this.repo) {
+      throw new Error('Not authenticated');
+    }
 
-    // Create file path: songs/artist-slug/song-slug.txt
     const artistSlug = this.slugify(song.artist);
     const songSlug = this.slugify(song.title);
     const path = `songs/${artistSlug}/${songSlug}.txt`;
-
-    // Prepare content with metadata
     const content = `Title: ${song.title}
 Artist: ${song.artist}
-Type: ${song.type}
+Type: ${song.type ?? 'chords'}
 
 ${song.content}`;
 
     try {
-      // Check if file exists
-      let sha = null;
+      let sha: string | null = null;
       try {
         const { data } = await this.octokit.repos.getContent({
           owner: this.owner,
           repo: this.repo,
           path,
         });
-        sha = data.sha;
-      } catch (error) {
-        // File doesn't exist, that's fine
+        sha = (data as GitHubFileItem).sha ?? null;
+      } catch {
+        // File doesn't exist
       }
 
-      // Create or update file
       const { data } = await this.octokit.repos.createOrUpdateFileContents({
         owner: this.owner,
         repo: this.repo,
         path,
-        message: sha
-          ? `Update ${song.title} by ${song.artist}`
-          : `Add ${song.title} by ${song.artist}`,
+        message: sha ? `Update ${song.title} by ${song.artist}` : `Add ${song.title} by ${song.artist}`,
         content: Buffer.from(content).toString('base64'),
-        sha,
+        sha: sha ?? undefined,
       });
 
       return {
         ...song,
         path,
-        sha: data.content.sha,
+        sha: data.content?.sha,
       };
     } catch (error) {
       console.error('Error saving song:', error);
@@ -231,13 +220,10 @@ ${song.content}`;
     }
   }
 
-  /**
-   * Delete a song from the repository
-   * @param {string} path - File path
-   * @param {string} sha - File SHA
-   */
-  async deleteSong(path, sha) {
-    if (!this.authenticated) throw new Error('Not authenticated');
+  async deleteSong(path: string, sha: string): Promise<void> {
+    if (!this.authenticated || !this.octokit || !this.owner || !this.repo) {
+      throw new Error('Not authenticated');
+    }
 
     await this.octokit.repos.deleteFile({
       owner: this.owner,
@@ -248,10 +234,7 @@ ${song.content}`;
     });
   }
 
-  /**
-   * Convert string to URL-friendly slug
-   */
-  slugify(text) {
+  private slugify(text: string): string {
     return text
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')

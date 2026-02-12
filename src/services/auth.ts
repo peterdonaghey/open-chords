@@ -5,18 +5,22 @@
 const API_BASE = import.meta.env.PROD ? '/api' : 'https://open-chords.org/api';
 const TOKEN_KEY = 'auth_token';
 
-/**
- * Sign up a new user
- * @param {string} email - User's email address
- * @param {string} password - User's password
- * @returns {Promise<{token: string, user: object}>}
- */
-export async function signUp(email, password) {
+export interface AuthUser {
+  email: string;
+  userId: string;
+  role: string;
+  emailVerified?: boolean;
+}
+
+export interface SignUpResponse {
+  token: string;
+  user: AuthUser;
+}
+
+export async function signUp(email: string, password: string): Promise<SignUpResponse> {
   const response = await fetch(`${API_BASE}/auth/signup`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
   });
 
@@ -30,18 +34,10 @@ export async function signUp(email, password) {
   return data;
 }
 
-/**
- * Sign in a user
- * @param {string} email - User's email address
- * @param {string} password - User's password
- * @returns {Promise<{token: string, user: object}>}
- */
-export async function signIn(email, password) {
+export async function signIn(email: string, password: string): Promise<SignUpResponse> {
   const response = await fetch(`${API_BASE}/auth/signin`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
   });
 
@@ -55,19 +51,11 @@ export async function signIn(email, password) {
   return data;
 }
 
-/**
- * Sign out the current user
- * @returns {Promise<void>}
- */
-export async function signOut() {
+export async function signOut(): Promise<void> {
   localStorage.removeItem(TOKEN_KEY);
 }
 
-/**
- * Get the current authenticated user
- * @returns {Promise<{email: string, userId: string, role: string}>}
- */
-export async function getCurrentUser() {
+export async function getCurrentUser(): Promise<AuthUser> {
   const token = localStorage.getItem(TOKEN_KEY);
 
   if (!token) {
@@ -76,9 +64,7 @@ export async function getCurrentUser() {
 
   const response = await fetch(`${API_BASE}/auth/me`, {
     method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
+    headers: { Authorization: `Bearer ${token}` },
   });
 
   if (!response.ok) {
@@ -91,15 +77,11 @@ export async function getCurrentUser() {
     email: user.email,
     userId: user.userId,
     role: user.role,
-    emailVerified: true, // No email verification in simple auth
+    emailVerified: true,
   };
 }
 
-/**
- * Get the current user's JWT token
- * @returns {Promise<string>}
- */
-export async function getIdToken() {
+export async function getIdToken(): Promise<string> {
   const token = localStorage.getItem(TOKEN_KEY);
 
   if (!token) {
@@ -109,30 +91,19 @@ export async function getIdToken() {
   return token;
 }
 
-/**
- * Check if user is authenticated
- * @returns {Promise<boolean>}
- */
-export async function isAuthenticated() {
+export async function isAuthenticated(): Promise<boolean> {
   try {
     await getCurrentUser();
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }
 
-/**
- * Initiate forgot password flow
- * @param {string} email - User's email address
- * @returns {Promise<{message: string, resetToken: string, resetUrl: string}>}
- */
-export async function forgotPassword(email) {
+export async function forgotPassword(email: string): Promise<{ message: string; resetToken?: string; resetUrl?: string }> {
   const response = await fetch(`${API_BASE}/auth/forgot-password`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email }),
   });
 
@@ -144,19 +115,14 @@ export async function forgotPassword(email) {
   return await response.json();
 }
 
-/**
- * Reset password with token
- * @param {string} email - User's email address
- * @param {string} resetToken - Reset token from forgot password
- * @param {string} newPassword - New password
- * @returns {Promise<{message: string}>}
- */
-export async function resetPassword(email, resetToken, newPassword) {
+export async function resetPassword(
+  email: string,
+  resetToken: string,
+  newPassword: string
+): Promise<{ message: string }> {
   const response = await fetch(`${API_BASE}/auth/reset-password`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, resetToken, newPassword }),
   });
 
@@ -168,20 +134,14 @@ export async function resetPassword(email, resetToken, newPassword) {
   return await response.json();
 }
 
-/**
- * Confirm password (alias for resetPassword for backward compatibility)
- */
-export async function confirmPassword(email, code, newPassword) {
+export async function confirmPassword(email: string, code: string, newPassword: string): Promise<{ message: string }> {
   return resetPassword(email, code, newPassword);
 }
 
-/**
- * Change password (authenticated user changes their own password)
- * @param {string} currentPassword - Current password
- * @param {string} newPassword - New password
- * @returns {Promise<{message: string}>}
- */
-export async function changePassword(currentPassword, newPassword) {
+export async function changePassword(
+  currentPassword: string,
+  newPassword: string
+): Promise<{ message: string }> {
   const token = localStorage.getItem(TOKEN_KEY);
 
   if (!token) {
@@ -192,7 +152,7 @@ export async function changePassword(currentPassword, newPassword) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({ currentPassword, newPassword }),
   });
@@ -205,16 +165,10 @@ export async function changePassword(currentPassword, newPassword) {
   return await response.json();
 }
 
-/**
- * Confirm sign up (no-op for backward compatibility)
- */
-export async function confirmSignUp(email, code) {
+export async function confirmSignUp(_email: string, _code: string): Promise<string> {
   return Promise.resolve('No email verification required');
 }
 
-/**
- * Resend confirmation code (no-op for backward compatibility)
- */
-export async function resendConfirmationCode(email) {
+export async function resendConfirmationCode(_email: string): Promise<string> {
   return Promise.resolve('No email verification required');
 }
