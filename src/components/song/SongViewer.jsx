@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { parseUGFormat } from '../services/parser';
+import { parseUGFormat } from '../../services/parser';
 import './SongViewer.css';
 
 /**

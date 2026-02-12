@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
-import LoginModal from './Auth/LoginModal';
+import { useAuth } from '../../context/AuthContext';
+import LoginModal from '../auth/LoginModal';
 import SongViewer from './SongViewer';
 import './SongEditor.css';
 

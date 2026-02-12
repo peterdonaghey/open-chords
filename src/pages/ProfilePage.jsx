@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { changePassword } from '../services/auth';
-import UserMenu from '../components/UserMenu';
+import UserMenu from '../components/layout/UserMenu';
 import './ProfilePage.css';
 
 /**

@@ -87,7 +87,7 @@
   white-space: pre-wrap;
   /* overflow-x: auto; */
   color: var(--text-primary);
-  padding-bottom: 20px; /* Protects text from horizontal scrollbar */
+  padding-bottom: 2.5rem; /* Clearance above horizontal scrollbar (40px) */
 }
 
 /* Compact grid layout - horizontal scrolling columns */
@@ -103,7 +103,7 @@
   flex: 1;
   padding-left: 10px;
   padding-right: 10px;
-  padding-bottom: 20px; /* Same as regular mode - protects from scrollbar */
+  padding-bottom: 2.5rem; /* Increased clearance above horizontal scrollbar */
 }
 
 .song-column {

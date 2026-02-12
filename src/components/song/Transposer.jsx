@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getTransposedKey } from '../services/transposer';
+import { getTransposedKey } from '../../services/transposer';
 import './Transposer.css';
 
 /**

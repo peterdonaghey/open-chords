@@ -1,0 +1,90 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import UnifiedNavBar from '../../components/layout/UnifiedNavBar';
+import SongList from '../../components/song/SongList';
+import { getAllSongs, deleteSong } from '../../services/storage';
+
+/**
+ * Songs Page - Browse and manage songs (PUBLIC)
+ */
+export default function SongsPage() {
+  const navigate = useNavigate();
+  const [songs, setSongs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    loadSongs();
+  }, []);
+
+  const loadSongs = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const fetchedSongs = await getAllSongs();
+      setSongs(fetchedSongs);
+    } catch (err) {
+      setError('Failed to load songs. Please try again.');
+      console.error('Error loading songs:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSelectSong = (song) => {
+    navigate(`/song/view/${song.id}`);
+  };
+
+  const handleNewSong = () => {
+    // Anyone can create songs now (no auth required)
+    navigate('/song/new');
+  };
+
+  const handleDeleteSong = async (song) => {
+    try {
+      await deleteSong(song.id);
+      // Reload songs after deletion
+      await loadSongs();
+    } catch (err) {
+      setError('Failed to delete song. Please try again.');
+      console.error('Error deleting song:', err);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="songs-page">
+        <UnifiedNavBar mode="normal" />
+        <div className="page-content">
+          <div className="loading">Loading songs...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="songs-page">
+        <UnifiedNavBar mode="normal" />
+        <div className="page-content">
+          <div className="error">{error}</div>
+          <button onClick={loadSongs}>Retry</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="songs-page">
+      <UnifiedNavBar mode="normal" />
+      <div className="page-content">
+        <SongList
+          songs={songs}
+          onSelectSong={handleSelectSong}
+          onNewSong={handleNewSong}
+          onDeleteSong={handleDeleteSong}
+        />
+      </div>
+    </div>
+  );
+}
