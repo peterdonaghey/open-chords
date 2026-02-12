@@ -1,15 +1,24 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import './SongList.css';
+import type { Song } from '../../types/song';
+import type { User } from '../../types/auth';
+
+interface SongListProps {
+  songs: Song[];
+  onSelectSong: (song: Song) => void;
+  onNewSong: () => void;
+  onDeleteSong: (song: Song) => void;
+}
 
 /**
  * SongList component - browse and search songs
  */
-function SongList({ songs, onSelectSong, onNewSong, onDeleteSong }) {
+function SongList({ songs, onSelectSong, onNewSong, onDeleteSong }: SongListProps) {
   const { user, isAuthenticated, isAdmin } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredSongs, setFilteredSongs] = useState(songs);
-  const [sortBy, setSortBy] = useState('title'); // title, artist, updatedAt
+  const [filteredSongs, setFilteredSongs] = useState<Song[]>(songs);
+  const [sortBy, setSortBy] = useState<'title' | 'artist' | 'updatedAt'>('title');
 
   useEffect(() => {
     let filtered = songs.filter(song => {
@@ -20,14 +29,13 @@ function SongList({ songs, onSelectSong, onNewSong, onDeleteSong }) {
       );
     });
 
-    // Sort songs
     filtered = filtered.sort((a, b) => {
       if (sortBy === 'title') {
         return a.title.localeCompare(b.title);
       } else if (sortBy === 'artist') {
         return a.artist.localeCompare(b.artist);
       } else if (sortBy === 'updatedAt') {
-        return new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0);
+        return new Date(b.updatedAt ?? 0).getTime() - new Date(a.updatedAt ?? 0).getTime();
       }
       return 0;
     });
@@ -35,8 +43,8 @@ function SongList({ songs, onSelectSong, onNewSong, onDeleteSong }) {
     setFilteredSongs(filtered);
   }, [songs, searchTerm, sortBy]);
 
-  const groupByArtist = () => {
-    const grouped = {};
+  const groupByArtist = (): Record<string, Song[]> => {
+    const grouped: Record<string, Song[]> = {};
     filteredSongs.forEach(song => {
       if (!grouped[song.artist]) {
         grouped[song.artist] = [];
@@ -69,7 +77,7 @@ function SongList({ songs, onSelectSong, onNewSong, onDeleteSong }) {
         <select
           className="sort-select"
           value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
+          onChange={(e) => setSortBy(e.target.value as 'title' | 'artist' | 'updatedAt')}
         >
           <option value="title">Sort by Title</option>
           <option value="artist">Sort by Artist</option>
@@ -131,17 +139,22 @@ function SongList({ songs, onSelectSong, onNewSong, onDeleteSong }) {
   );
 }
 
-/**
- * SongCard component - individual song item
- */
-function SongCard({ song, onSelect, onDelete, currentUser, isAuthenticated, isAdmin }) {
+interface SongCardProps {
+  song: Song;
+  onSelect: () => void;
+  onDelete: () => void;
+  currentUser: User | null;
+  isAuthenticated: boolean;
+  isAdmin: boolean;
+}
+
+function SongCard({ song, onSelect, onDelete, currentUser, isAuthenticated, isAdmin }: SongCardProps) {
   const [showMenu, setShowMenu] = useState(false);
 
-  // Check if user can delete this song (owner OR admin)
   const isOwner = isAuthenticated && currentUser && song.userId === currentUser.userId;
   const canDelete = isOwner || isAdmin;
 
-  const handleDelete = (e) => {
+  const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (window.confirm(`Delete "${song.title}" by ${song.artist}?`)) {
       onDelete();

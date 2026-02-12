@@ -11,7 +11,7 @@ export default function ForgotPasswordForm() {
   const navigate = useNavigate();
   const { forgotPassword, confirmPassword } = useAuth();
 
-  const [step, setStep] = useState('email'); // 'email' or 'reset'
+  const [step, setStep] = useState<'email' | 'reset'>('email');
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -20,7 +20,7 @@ export default function ForgotPasswordForm() {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
-  async function handleRequestReset(e) {
+  async function handleRequestReset(e: React.FormEvent) {
     e.preventDefault();
     setError('');
 
@@ -36,19 +36,20 @@ export default function ForgotPasswordForm() {
       setStep('reset');
     } catch (err) {
       console.error('Forgot password error:', err);
-      if (err.code === 'UserNotFoundException') {
+      const errObj = err as { code?: string; message?: string };
+      if (errObj.code === 'UserNotFoundException') {
         setError('No account found with this email');
-      } else if (err.code === 'LimitExceededException') {
+      } else if (errObj.code === 'LimitExceededException') {
         setError('Too many requests. Please try again later.');
       } else {
-        setError(err.message || 'Failed to send reset code. Please try again.');
+        setError(errObj.message ?? 'Failed to send reset code. Please try again.');
       }
     } finally {
       setLoading(false);
     }
   }
 
-  async function handleResetPassword(e) {
+  async function handleResetPassword(e: React.FormEvent) {
     e.preventDefault();
     setError('');
 
@@ -76,14 +77,15 @@ export default function ForgotPasswordForm() {
       }, 1500);
     } catch (err) {
       console.error('Reset password error:', err);
-      if (err.code === 'CodeMismatchException') {
+      const errObj = err as { code?: string; message?: string };
+      if (errObj.code === 'CodeMismatchException') {
         setError('Invalid verification code');
-      } else if (err.code === 'ExpiredCodeException') {
+      } else if (errObj.code === 'ExpiredCodeException') {
         setError('Verification code has expired. Please request a new one.');
-      } else if (err.code === 'InvalidPasswordException') {
+      } else if (errObj.code === 'InvalidPasswordException') {
         setError('Password does not meet requirements');
       } else {
-        setError(err.message || 'Failed to reset password. Please try again.');
+        setError(errObj.message ?? 'Failed to reset password. Please try again.');
       }
     } finally {
       setLoading(false);
@@ -205,4 +207,3 @@ export default function ForgotPasswordForm() {
     </AuthLayout>
   );
 }
-

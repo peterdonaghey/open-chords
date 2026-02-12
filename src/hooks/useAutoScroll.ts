@@ -1,18 +1,23 @@
 import { useState, useEffect, useRef } from 'react';
 
+export interface UseAutoScrollReturn {
+  isScrolling: boolean;
+  toggle: () => void;
+  start: () => void;
+  stop: () => void;
+}
+
 /**
  * Auto-scroll hook for smooth scrolling through song content
- * @param {boolean} enabled - Whether auto-scroll is enabled
- * @param {number} speed - Scroll speed multiplier (1-10)
  */
-export function useAutoScroll(enabled = false, speed = 3) {
+export function useAutoScroll(enabled = false, speed = 3): UseAutoScrollReturn {
   const [isScrolling, setIsScrolling] = useState(false);
-  const rafRef = useRef(null);
-  const lastTimeRef = useRef(null);
+  const rafRef = useRef<number | null>(null);
+  const lastTimeRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!enabled || !isScrolling) {
-      if (rafRef.current) {
+      if (rafRef.current !== null) {
         cancelAnimationFrame(rafRef.current);
         rafRef.current = null;
       }
@@ -20,29 +25,21 @@ export function useAutoScroll(enabled = false, speed = 3) {
       return;
     }
 
-    const scroll = (timestamp) => {
-      if (!lastTimeRef.current) {
+    const scroll = (timestamp: number) => {
+      if (lastTimeRef.current === null) {
         lastTimeRef.current = timestamp;
         rafRef.current = requestAnimationFrame(scroll);
-        return; // Skip first frame to establish timing
+        return;
       }
 
       const elapsed = timestamp - lastTimeRef.current;
-      
-      // Calculate pixels per SECOND, then scale by elapsed time
-      // Speed 1: 10px/sec (very slow but clearly visible)
-      // Speed 5: 50px/sec (comfortable reading pace)
-      // Speed 10: 100px/sec (fast but usable)
       const pixelsPerSecond = 10 + (speed - 1) * 10;
-      
-      // Convert to pixels for this frame based on actual elapsed time
       const scrollAmount = pixelsPerSecond * (elapsed / 1000);
-      
+
       window.scrollBy(0, scrollAmount);
       lastTimeRef.current = timestamp;
 
-      // Check if reached bottom
-      const scrolledToBottom = 
+      const scrolledToBottom =
         window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 10;
 
       if (scrolledToBottom) {
@@ -56,18 +53,21 @@ export function useAutoScroll(enabled = false, speed = 3) {
     rafRef.current = requestAnimationFrame(scroll);
 
     return () => {
-      if (rafRef.current) {
+      if (rafRef.current !== null) {
         cancelAnimationFrame(rafRef.current);
       }
     };
   }, [enabled, isScrolling, speed]);
 
-  // Keyboard shortcut for spacebar
   useEffect(() => {
-    const handleKeyPress = (e) => {
-      if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (
+        e.code === 'Space' &&
+        (e.target as HTMLElement).tagName !== 'INPUT' &&
+        (e.target as HTMLElement).tagName !== 'TEXTAREA'
+      ) {
         e.preventDefault();
-        setIsScrolling(prev => !prev);
+        setIsScrolling((prev) => !prev);
       }
     };
 
@@ -77,9 +77,8 @@ export function useAutoScroll(enabled = false, speed = 3) {
 
   return {
     isScrolling,
-    toggle: () => setIsScrolling(prev => !prev),
+    toggle: () => setIsScrolling((prev) => !prev),
     start: () => setIsScrolling(true),
     stop: () => setIsScrolling(false),
   };
 }
-

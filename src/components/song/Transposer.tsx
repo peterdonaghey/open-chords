@@ -2,24 +2,22 @@ import { useState, useEffect } from 'react';
 import { getTransposedKey } from '../../services/transposer';
 import './Transposer.css';
 
+interface TransposerProps {
+  originalKey?: string | null;
+  currentTranspose?: number;
+  onTranspose: (value: number) => void;
+}
+
 /**
  * Transposer component - controls for transposing songs
  */
-function Transposer({ originalKey, currentTranspose, onTranspose }) {
-  const [transpose, setTranspose] = useState(currentTranspose || 0);
-  const [currentKey, setCurrentKey] = useState(originalKey);
+function Transposer({ originalKey, currentTranspose = 0, onTranspose }: TransposerProps) {
+  const [transpose, setTranspose] = useState(currentTranspose);
+  const currentKey = originalKey ? getTransposedKey(originalKey, transpose) : '';
 
-  // Sync internal state with prop changes (for keyboard shortcuts)
   useEffect(() => {
-    setTranspose(currentTranspose || 0);
+    setTranspose(currentTranspose);
   }, [currentTranspose]);
-
-  useEffect(() => {
-    if (originalKey) {
-      const newKey = getTransposedKey(originalKey, transpose);
-      setCurrentKey(newKey);
-    }
-  }, [originalKey, transpose]);
 
   const handleTransposeUp = () => {
     const newTranspose = transpose + 1;

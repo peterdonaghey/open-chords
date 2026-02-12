@@ -6,21 +6,37 @@ import './AdminPage.css';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
+interface AdminUser {
+  userId: string;
+  email: string;
+  role: string;
+  songCount?: number;
+  createdAt?: string;
+}
+
+interface AdminSong {
+  id: string;
+  title: string;
+  artist: string;
+  ownerEmail?: string;
+  userId?: string;
+  createdAt: string;
+}
+
 /**
  * Admin Page - Manage users and songs
  */
 function AdminPage() {
   const navigate = useNavigate();
   const { user, isAdmin, isLoading } = useAuth();
-  const [users, setUsers] = useState([]);
-  const [allSongs, setAllSongs] = useState([]);
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [allSongs, setAllSongs] = useState<AdminSong[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [selectedUserId, setSelectedUserId] = useState(null);
-  const [selectedSongs, setSelectedSongs] = useState(new Set());
-  const [activeTab, setActiveTab] = useState('users'); // 'users' or 'songs'
-  
-  // User management modals
+  const [error, setError] = useState<string | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [selectedSongs, setSelectedSongs] = useState<Set<string>>(new Set());
+  const [activeTab, setActiveTab] = useState<'users' | 'songs' | 'orphaned'>('users');
+
   const [resetPasswordModal, setResetPasswordModal] = useState({ isOpen: false, userEmail: '' });
   const [deleteUserModal, setDeleteUserModal] = useState({ isOpen: false, userEmail: '', songCount: 0 });
   const [newPassword, setNewPassword] = useState('');
@@ -52,116 +68,78 @@ function AdminPage() {
   };
 
   const loadUsers = async () => {
-    try {
-      const token = await getIdToken();
-      const response = await fetch(`${API_BASE}/admin/users`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+    const token = await getIdToken();
+    const response = await fetch(`${API_BASE}/admin/users`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-      console.log('Admin users response:', response.status, response.statusText);
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Admin users error:', errorText);
-        throw new Error(`Failed to fetch users: ${response.status} - ${errorText}`);
-      }
-
-      const data = await response.json();
-      setUsers(data);
-    } catch (err) {
-      console.error('Error loading users:', err);
-      throw err;
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to fetch users: ${response.status} - ${errorText}`);
     }
+
+    const data = await response.json();
+    setUsers(data);
   };
 
   const loadAllSongs = async () => {
-    try {
-      const token = await getIdToken();
-      const response = await fetch(`${API_BASE}/admin/songs`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+    const token = await getIdToken();
+    const response = await fetch(`${API_BASE}/admin/songs`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-      console.log('Admin songs response:', response.status, response.statusText);
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Admin songs error:', errorText);
-        throw new Error(`Failed to fetch songs: ${response.status} - ${errorText}`);
-      }
-
-      const data = await response.json();
-      setAllSongs(data);
-    } catch (err) {
-      console.error('Error loading songs:', err);
-      throw err;
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to fetch songs: ${response.status} - ${errorText}`);
     }
+
+    const data = await response.json();
+    setAllSongs(data);
   };
 
-  const handleDeleteSong = async (songId) => {
-    if (!window.confirm('Are you sure you want to delete this song?')) {
-      return;
-    }
+  const handleDeleteSong = async (songId: string) => {
+    if (!window.confirm('Are you sure you want to delete this song?')) return;
 
     try {
       const token = await getIdToken();
       const response = await fetch(`${API_BASE}/admin/songs?id=${songId}`, {
         method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to delete song');
-      }
+      if (!response.ok) throw new Error('Failed to delete song');
 
-      // Reload data
       await loadData();
       setSelectedSongs(new Set());
     } catch (err) {
-      alert('Failed to delete song: ' + err.message);
+      alert('Failed to delete song: ' + (err instanceof Error ? err.message : String(err)));
       console.error('Error deleting song:', err);
     }
   };
 
   const handleBulkDelete = async () => {
-    if (selectedSongs.size === 0) {
-      return;
-    }
-
-    if (!window.confirm(`Are you sure you want to delete ${selectedSongs.size} songs?`)) {
-      return;
-    }
+    if (selectedSongs.size === 0) return;
+    if (!window.confirm(`Are you sure you want to delete ${selectedSongs.size} songs?`)) return;
 
     try {
       const token = await getIdToken();
-      
-      // Delete songs in parallel
       await Promise.all(
         Array.from(selectedSongs).map(songId =>
           fetch(`${API_BASE}/admin/songs?id=${songId}`, {
             method: 'DELETE',
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           })
         )
       );
-
-      // Reload data
       await loadData();
       setSelectedSongs(new Set());
     } catch (err) {
-      alert('Failed to delete some songs: ' + err.message);
+      alert('Failed to delete some songs: ' + (err instanceof Error ? err.message : String(err)));
       console.error('Error bulk deleting songs:', err);
     }
   };
 
-  const toggleSongSelection = (songId) => {
+  const toggleSongSelection = (songId: string) => {
     const newSelection = new Set(selectedSongs);
     if (newSelection.has(songId)) {
       newSelection.delete(songId);
@@ -171,38 +149,32 @@ function AdminPage() {
     setSelectedSongs(newSelection);
   };
 
+  const getFilteredSongs = (): AdminSong[] => {
+    if (!selectedUserId) return allSongs;
+    return allSongs.filter(song => song.userId === selectedUserId);
+  };
+
+  const getOrphanedSongs = (): AdminSong[] => {
+    return allSongs.filter(song =>
+      !song.userId ||
+      song.userId === 'anonymous' ||
+      song.ownerEmail === 'unknown'
+    );
+  };
+
   const selectAllSongs = () => {
     const filtered = getFilteredSongs();
     setSelectedSongs(new Set(filtered.map(s => s.id)));
   };
 
-  const deselectAllSongs = () => {
-    setSelectedSongs(new Set());
-  };
+  const deselectAllSongs = () => setSelectedSongs(new Set());
 
-  const getFilteredSongs = () => {
-    if (!selectedUserId) return allSongs;
-    return allSongs.filter(song => song.userId === selectedUserId);
-  };
-
-  const getOrphanedSongs = () => {
-    return allSongs.filter(song => 
-      !song.userId || 
-      song.userId === 'anonymous' || 
-      song.ownerEmail === 'unknown'
-    );
-  };
-
-  // User management actions
-  const handleRoleChange = async (email, newRole) => {
+  const handleRoleChange = async (email: string, newRole: string) => {
     if (email === user?.email) {
       alert('You cannot change your own role');
       return;
     }
-
-    if (!window.confirm(`Change user role to ${newRole}?`)) {
-      return;
-    }
+    if (!window.confirm(`Change user role to ${newRole}?`)) return;
 
     try {
       setActionLoading(true);
@@ -218,13 +190,12 @@ function AdminPage() {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to update role');
+        throw new Error(error.error ?? 'Failed to update role');
       }
-
       await loadUsers();
       alert('User role updated successfully');
     } catch (err) {
-      alert('Failed to update role: ' + err.message);
+      alert('Failed to update role: ' + (err instanceof Error ? err.message : String(err)));
       console.error('Error updating role:', err);
     } finally {
       setActionLoading(false);
@@ -246,22 +217,18 @@ function AdminPage() {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
-          email: resetPasswordModal.userEmail, 
-          newPassword 
-        }),
+        body: JSON.stringify({ email: resetPasswordModal.userEmail, newPassword }),
       });
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to reset password');
+        throw new Error(error.error ?? 'Failed to reset password');
       }
-
       alert('Password reset successfully');
       setResetPasswordModal({ isOpen: false, userEmail: '' });
       setNewPassword('');
     } catch (err) {
-      alert('Failed to reset password: ' + err.message);
+      alert('Failed to reset password: ' + (err instanceof Error ? err.message : String(err)));
       console.error('Error resetting password:', err);
     } finally {
       setActionLoading(false);
@@ -283,14 +250,13 @@ function AdminPage() {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to delete user');
+        throw new Error(error.error ?? 'Failed to delete user');
       }
-
       alert('User deleted successfully');
       setDeleteUserModal({ isOpen: false, userEmail: '', songCount: 0 });
       await loadData();
     } catch (err) {
-      alert('Failed to delete user: ' + err.message);
+      alert('Failed to delete user: ' + (err instanceof Error ? err.message : String(err)));
       console.error('Error deleting user:', err);
     } finally {
       setActionLoading(false);
@@ -399,7 +365,7 @@ function AdminPage() {
                         }}
                         className="btn-link"
                       >
-                        {userRow.songCount}
+                        {userRow.songCount ?? 0}
                       </button>
                     </td>
                     <td>
@@ -416,10 +382,10 @@ function AdminPage() {
                           🔑
                         </button>
                         <button
-                          onClick={() => setDeleteUserModal({ 
-                            isOpen: true, 
+                          onClick={() => setDeleteUserModal({
+                            isOpen: true,
                             userEmail: userRow.email,
-                            songCount: userRow.songCount 
+                            songCount: userRow.songCount ?? 0,
                           })}
                           className="btn-action btn-danger"
                           disabled={actionLoading || userRow.email === user?.email}
@@ -446,26 +412,15 @@ function AdminPage() {
                 {selectedSongs.size > 0 && (
                   <>
                     <span className="selection-count">{selectedSongs.size} selected</span>
-                    <button onClick={deselectAllSongs} className="btn-secondary">
-                      Deselect All
-                    </button>
-                    <button onClick={handleBulkDelete} className="btn-danger">
-                      Delete Selected
-                    </button>
+                    <button onClick={deselectAllSongs} className="btn-secondary">Deselect All</button>
+                    <button onClick={handleBulkDelete} className="btn-danger">Delete Selected</button>
                   </>
                 )}
                 {selectedSongs.size === 0 && filteredSongs.length > 0 && (
-                  <button onClick={selectAllSongs} className="btn-secondary">
-                    Select All
-                  </button>
+                  <button onClick={selectAllSongs} className="btn-secondary">Select All</button>
                 )}
                 {selectedUserId && (
-                  <button
-                    onClick={() => setSelectedUserId(null)}
-                    className="btn-secondary"
-                  >
-                    Show All
-                  </button>
+                  <button onClick={() => setSelectedUserId(null)} className="btn-secondary">Show All</button>
                 )}
               </div>
             </div>
@@ -499,23 +454,11 @@ function AdminPage() {
                     </td>
                     <td>{song.title}</td>
                     <td>{song.artist}</td>
-                    <td>
-                      <span className="owner-email">{song.ownerEmail}</span>
-                    </td>
+                    <td><span className="owner-email">{song.ownerEmail}</span></td>
                     <td>{new Date(song.createdAt).toLocaleDateString()}</td>
                     <td>
-                      <button
-                        onClick={() => navigate(`/song/view/${song.id}`)}
-                        className="btn-view"
-                      >
-                        View
-                      </button>
-                      <button
-                        onClick={() => handleDeleteSong(song.id)}
-                        className="btn-delete"
-                      >
-                        Delete
-                      </button>
+                      <button onClick={() => navigate(`/song/view/${song.id}`)} className="btn-view">View</button>
+                      <button onClick={() => handleDeleteSong(song.id)} className="btn-delete">Delete</button>
                     </td>
                   </tr>
                 ))}
@@ -528,9 +471,7 @@ function AdminPage() {
           <div className="admin-section">
             <div className="section-header">
               <h2>Orphaned Songs</h2>
-              <p className="section-description">
-                These songs have invalid or missing user information
-              </p>
+              <p className="section-description">These songs have invalid or missing user information</p>
             </div>
 
             <table className="all-songs-table">
@@ -568,21 +509,11 @@ function AdminPage() {
                     </td>
                     <td>{song.title}</td>
                     <td>{song.artist}</td>
-                    <td><code>{song.userId || 'missing'}</code></td>
-                    <td>{song.ownerEmail || 'unknown'}</td>
+                    <td><code>{song.userId ?? 'missing'}</code></td>
+                    <td>{song.ownerEmail ?? 'unknown'}</td>
                     <td>
-                      <button
-                        onClick={() => navigate(`/song/view/${song.id}`)}
-                        className="btn-view"
-                      >
-                        View
-                      </button>
-                      <button
-                        onClick={() => handleDeleteSong(song.id)}
-                        className="btn-delete"
-                      >
-                        Delete
-                      </button>
+                      <button onClick={() => navigate(`/song/view/${song.id}`)} className="btn-view">View</button>
+                      <button onClick={() => handleDeleteSong(song.id)} className="btn-delete">Delete</button>
                     </td>
                   </tr>
                 ))}
@@ -606,7 +537,6 @@ function AdminPage() {
         )}
       </div>
 
-      {/* Reset Password Modal */}
       {resetPasswordModal.isOpen && (
         <div className="modal-overlay" onClick={() => setResetPasswordModal({ isOpen: false, userEmail: '' })}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -632,10 +562,7 @@ function AdminPage() {
                 {actionLoading ? 'Resetting...' : 'Reset Password'}
               </button>
               <button
-                onClick={() => {
-                  setResetPasswordModal({ isOpen: false, userEmail: '' });
-                  setNewPassword('');
-                }}
+                onClick={() => { setResetPasswordModal({ isOpen: false, userEmail: '' }); setNewPassword(''); }}
                 className="btn-secondary"
                 disabled={actionLoading}
               >
@@ -646,7 +573,6 @@ function AdminPage() {
         </div>
       )}
 
-      {/* Delete User Modal */}
       {deleteUserModal.isOpen && (
         <div className="modal-overlay" onClick={() => setDeleteUserModal({ isOpen: false, userEmail: '', songCount: 0 })}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -658,11 +584,7 @@ function AdminPage() {
               </p>
             )}
             <div className="modal-actions">
-              <button
-                onClick={handleDeleteUser}
-                className="btn-danger"
-                disabled={actionLoading}
-              >
+              <button onClick={handleDeleteUser} className="btn-danger" disabled={actionLoading}>
                 {actionLoading ? 'Deleting...' : 'Delete User'}
               </button>
               <button
@@ -681,4 +603,3 @@ function AdminPage() {
 }
 
 export default AdminPage;
-

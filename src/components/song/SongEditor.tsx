@@ -3,24 +3,31 @@ import { useAuth } from '../../context/AuthContext';
 import LoginModal from '../auth/LoginModal';
 import SongViewer from './SongViewer';
 import './SongEditor.css';
+import type { Song } from '../../types/song';
+
+interface SongEditorProps {
+  song?: Song | null;
+  onSave: (songData: Song) => void;
+  onCancel?: () => void;
+}
 
 /**
  * SongEditor component - create/edit songs with live preview
  */
-function SongEditor({ song, onSave, onCancel }) {
+function SongEditor({ song, onSave, onCancel }: SongEditorProps) {
   const { user, isAuthenticated } = useAuth();
-  const [title, setTitle] = useState(song?.title || '');
-  const [artist, setArtist] = useState(song?.artist || '');
-  const [type, setType] = useState(song?.type || 'chords');
-  const [content, setContent] = useState(song?.content || '');
+  const [title, setTitle] = useState(song?.title ?? '');
+  const [artist, setArtist] = useState(song?.artist ?? '');
+  const [type, setType] = useState<'chords' | 'tabs'>(song?.type ?? 'chords');
+  const [content, setContent] = useState(song?.content ?? '');
   const [showPreview, setShowPreview] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const songData = {
-      id: song?.id || Date.now().toString(),
+    const songData: Song = {
+      id: song?.id ?? Date.now().toString(),
       title: title.trim(),
       artist: artist.trim(),
       type,
@@ -43,7 +50,7 @@ function SongEditor({ song, onSave, onCancel }) {
             ) : (
               <span className="user-name anonymous">
                 Anonymous
-                <button 
+                <button
                   type="button"
                   className="login-link"
                   onClick={() => setIsLoginModalOpen(true)}
@@ -97,7 +104,7 @@ function SongEditor({ song, onSave, onCancel }) {
             <select
               id="type"
               value={type}
-              onChange={(e) => setType(e.target.value)}
+              onChange={(e) => setType(e.target.value as 'chords' | 'tabs')}
             >
               <option value="chords">Chords</option>
               <option value="tabs">Tabs</option>
@@ -141,10 +148,7 @@ function SongEditor({ song, onSave, onCancel }) {
       <LoginModal
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}
-        onSuccess={() => {
-          setIsLoginModalOpen(false);
-          // User is now logged in, component will re-render
-        }}
+        onSuccess={() => setIsLoginModalOpen(false)}
       />
     </div>
   );

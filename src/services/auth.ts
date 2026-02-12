@@ -10,6 +10,7 @@ export interface AuthUser {
   userId: string;
   role: string;
   emailVerified?: boolean;
+  createdAt?: string;
 }
 
 export interface SignUpResponse {
@@ -78,6 +79,7 @@ export async function getCurrentUser(): Promise<AuthUser> {
     userId: user.userId,
     role: user.role,
     emailVerified: true,
+    createdAt: user.createdAt,
   };
 }
 

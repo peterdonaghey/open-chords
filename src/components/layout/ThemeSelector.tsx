@@ -2,20 +2,37 @@ import { useState, useRef, useEffect } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import './ThemeSelector.css';
 
-export default function ThemeSelector({ onDropdownChange }) {
+interface ThemeSelectorProps {
+  onDropdownChange?: (isOpen: boolean) => void;
+}
+
+const categoryNames: Record<string, string> = {
+  retro: '🕹️ Retro',
+  neon: '⚡ Neon',
+  vintage: '📜 Vintage',
+  rainbow: '🌈 Rainbow',
+  nature: '🌿 Nature',
+  light: '☀️ Light',
+  dark: '🌙 Dark',
+  accessible: '♿ Accessible',
+};
+
+export default function ThemeSelector({ onDropdownChange }: ThemeSelectorProps) {
   const { currentTheme, changeTheme, themesByCategory } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
-  const dropdownRef = useRef(null);
-  const themeButtonRefs = useRef([]);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const themeButtonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   // Get flat list of all theme keys in order
-  const getAllThemeKeys = () => {
-    const keys = [];
+  const getAllThemeKeys = (): string[] => {
+    const keys: string[] = [];
     Object.keys(categoryNames).forEach(categoryKey => {
       const themesInCategory = themesByCategory[categoryKey];
       if (themesInCategory && themesInCategory.length > 0) {
-        themesInCategory.forEach(theme => keys.push(theme.key));
+        themesInCategory.forEach(theme => {
+          if (theme.key) keys.push(theme.key);
+        });
       }
     });
     return keys;
@@ -23,13 +40,13 @@ export default function ThemeSelector({ onDropdownChange }) {
 
   // Handle keyboard navigation
   useEffect(() => {
-    function handleKeyDown(event) {
+    function handleKeyDown(event: KeyboardEvent) {
       const allThemeKeys = getAllThemeKeys();
       const currentIndex = allThemeKeys.indexOf(currentTheme);
-      
+
       if (!isOpen) return;
-      if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') return;
-      
+      if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) return;
+
       if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
         event.preventDefault();
         const prevIndex = currentIndex > 0 ? currentIndex - 1 : allThemeKeys.length - 1;
@@ -50,8 +67,8 @@ export default function ThemeSelector({ onDropdownChange }) {
   }, [currentTheme, themesByCategory, changeTheme, isOpen]);
 
   useEffect(() => {
-    function handleClickOutside(event) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     }
@@ -69,20 +86,9 @@ export default function ThemeSelector({ onDropdownChange }) {
     }
   }, [isOpen, onDropdownChange]);
 
-  const handleThemeSelect = (themeKey) => {
+  const handleThemeSelect = (themeKey: string) => {
     changeTheme(themeKey);
     setIsOpen(false);
-  };
-
-  const categoryNames = {
-    retro: '🕹️ Retro',
-    neon: '⚡ Neon',
-    vintage: '📜 Vintage',
-    rainbow: '🌈 Rainbow',
-    nature: '🌿 Nature',
-    light: '☀️ Light',
-    dark: '🌙 Dark',
-    accessible: '♿ Accessible',
   };
 
   // Scroll focused theme into view
@@ -136,9 +142,9 @@ export default function ThemeSelector({ onDropdownChange }) {
                     return (
                       <button
                         key={key}
-                        ref={el => themeButtonRefs.current[currentIndex] = el}
+                        ref={el => { themeButtonRefs.current[currentIndex] = el; }}
                         className={`theme-option ${currentTheme === key ? 'active' : ''}`}
-                        onClick={() => handleThemeSelect(key)}
+                        onClick={() => handleThemeSelect(key ?? '')}
                       >
                         <div className="theme-preview">
                           <div
@@ -168,4 +174,3 @@ export default function ThemeSelector({ onDropdownChange }) {
     </div>
   );
 }
-

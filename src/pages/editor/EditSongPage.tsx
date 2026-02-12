@@ -5,6 +5,7 @@ import UnifiedNavBar from '../../components/layout/UnifiedNavBar';
 import SongEditor from '../../components/song/SongEditor';
 import LoginModal from '../../components/auth/LoginModal';
 import { getSong, updateSong } from '../../services/storage';
+import type { Song } from '../../types/song';
 
 /**
  * Edit Song Page - Edit an existing song (PUBLIC - allows anonymous)
@@ -12,10 +13,9 @@ import { getSong, updateSong } from '../../services/storage';
 export default function EditSongPage() {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
-  const [song, setSong] = useState(null);
+  const [song, setSong] = useState<Song | null>(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
 
   useEffect(() => {
@@ -26,9 +26,8 @@ export default function EditSongPage() {
     try {
       setLoading(true);
       setError(null);
-      // Get song ID from URL
       const id = window.location.pathname.split('/').pop();
-      const fetchedSong = await getSong(id);
+      const fetchedSong = await getSong(id ?? '');
       setSong(fetchedSong);
     } catch (err) {
       setError('Failed to load song. Please try again.');
@@ -38,19 +37,15 @@ export default function EditSongPage() {
     }
   };
 
-  const handleSave = async (songData) => {
+  const handleSave = async (songData: Song) => {
     try {
-      setSaving(true);
       setError(null);
       await updateSong(songData);
       navigate(`/song/view/${songData.id}`);
     } catch (err) {
-      const errorMessage = err.message || 'Failed to save song. Please try again.';
+      const errorMessage = err instanceof Error ? err.message : 'Failed to save song. Please try again.';
       setError(errorMessage);
       console.error('Error saving song:', err);
-      setSaving(false);
-      
-      // Show alert for immediate feedback
       alert(`Error: ${errorMessage}`);
     }
   };
@@ -114,12 +109,10 @@ export default function EditSongPage() {
           )}
         </div>
         <SongEditor song={song} onSave={handleSave} onCancel={handleCancel} />
-        <LoginModal 
-          isOpen={showLoginModal} 
+        <LoginModal
+          isOpen={showLoginModal}
           onClose={() => setShowLoginModal(false)}
-          onSuccess={() => {
-            setShowLoginModal(false);
-          }}
+          onSuccess={() => setShowLoginModal(false)}
         />
       </div>
     </div>

@@ -5,6 +5,7 @@ import UnifiedNavBar from '../../components/layout/UnifiedNavBar';
 import SongViewer from '../../components/song/SongViewer';
 import { getSong } from '../../services/storage';
 import { transposeSong } from '../../services/transposer';
+import type { Song } from '../../types/song';
 
 /**
  * View Song Page - View and transpose a song (PUBLIC)
@@ -12,60 +13,53 @@ import { transposeSong } from '../../services/transposer';
 export default function ViewSongPage() {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
-  const [song, setSong] = useState(null);
+  const [song, setSong] = useState<Song | null>(null);
   const [transposedContent, setTransposedContent] = useState('');
   const [currentTranspose, setCurrentTranspose] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [isDoubleColumn, setIsDoubleColumn] = useState(false);
   const [isNavVisible, setIsNavVisible] = useState(false);
   const [hasDropdownOpen, setHasDropdownOpen] = useState(false);
   const [isAtTop, setIsAtTop] = useState(true);
-  const [navActuallyVisible, setNavActuallyVisible] = useState(true); // for padding
-  const scrollContainerRef = useRef(null);
+  const [navActuallyVisible, setNavActuallyVisible] = useState(true);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Scroll tracking (non-compact only): nav sticks at top, hides when scrolled, shows on hover
   useEffect(() => {
-    if (isDoubleColumn) return; // compact mode: hover-to-show only, no scroll tracking
+    if (isDoubleColumn) return;
     const el = scrollContainerRef.current;
     if (!el) return;
 
     const checkScroll = () => {
       setIsAtTop(el.scrollTop < 80);
     };
-    checkScroll(); // initial
+    checkScroll();
     el.addEventListener('scroll', checkScroll);
     return () => el.removeEventListener('scroll', checkScroll);
-  }, [isDoubleColumn, song]); // Re-run when song loads (ref becomes available)
+  }, [isDoubleColumn, song]);
 
-  // Mouse tracking for auto-hide navbar - but stay visible if dropdown is open
   useEffect(() => {
-    let hideTimeout;
-    
-    const handleMouseMove = (e) => {
-      // Don't hide if dropdown is open
+    let hideTimeout: ReturnType<typeof setTimeout> | undefined;
+
+    const handleMouseMove = (e: MouseEvent) => {
       if (hasDropdownOpen) {
         setIsNavVisible(true);
         return;
       }
-      
-      // Show navbar when mouse is near top
+
       if (e.clientY < 100) {
         setIsNavVisible(true);
-        
-        // Clear any existing timeout
+
         if (hideTimeout) {
           clearTimeout(hideTimeout);
         }
-        
-        // Hide after 3 seconds of no movement at top (increased from 2s)
+
         hideTimeout = setTimeout(() => {
-          if (!hasDropdownOpen) { // Double-check dropdown isn't open
+          if (!hasDropdownOpen) {
             setIsNavVisible(false);
           }
         }, 3000);
       } else if (e.clientY > 100) {
-        // Hide immediately when mouse moves away from top area
         if (!hasDropdownOpen) {
           setIsNavVisible(false);
         }
@@ -76,7 +70,7 @@ export default function ViewSongPage() {
     };
 
     window.addEventListener('mousemove', handleMouseMove);
-    
+
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       if (hideTimeout) {
@@ -93,9 +87,8 @@ export default function ViewSongPage() {
     try {
       setLoading(true);
       setError(null);
-      // Get song ID from URL
       const id = window.location.pathname.split('/').pop();
-      const fetchedSong = await getSong(id);
+      const fetchedSong = await getSong(id ?? '');
       if (fetchedSong) {
         setSong(fetchedSong);
         setTransposedContent(fetchedSong.content);
@@ -115,21 +108,20 @@ export default function ViewSongPage() {
     }
   }, [currentTranspose, song]);
 
-  const handleTranspose = (semitones) => {
+  const handleTranspose = (semitones: number) => {
     setCurrentTranspose(semitones);
   };
 
   const handleEdit = () => {
-    // Require auth to edit songs
+    if (!song) return;
     if (!isAuthenticated) {
       navigate('/login', { state: { from: { pathname: `/song/edit/${song.id}` } } });
       return;
     }
-    // Check if user owns this song (check both userId and ownerEmail for compatibility)
-    const isOwner = 
-      (song.userId && user?.userId === song.userId) || 
+    const isOwner =
+      (song.userId && user?.userId === song.userId) ||
       (song.ownerEmail && user?.email === song.ownerEmail);
-    
+
     if (song.userId && song.userId !== 'anonymous' && !isOwner) {
       alert('You can only edit your own songs');
       return;
@@ -138,8 +130,7 @@ export default function ViewSongPage() {
   };
 
   useEffect(() => {
-    // Keyboard shortcuts
-    const handleKeyPress = (e) => {
+    const handleKeyPress = (e: KeyboardEvent) => {
       if (e.key === 'ArrowUp') {
         e.preventDefault();
         setCurrentTranspose(prev => {
@@ -172,7 +163,7 @@ export default function ViewSongPage() {
         <UnifiedNavBar mode="normal" />
         <div className="page-content">
           <div className="error">
-            <p>{error || 'Song not found'}</p>
+            <p>{error ?? 'Song not found'}</p>
             <button onClick={() => navigate('/songs')}>Back to Library</button>
           </div>
         </div>

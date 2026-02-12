@@ -6,18 +6,23 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import LoginModal from '../auth/LoginModal';
 import './UserMenu.css';
+import type { User } from '../../types/auth';
 
-export default function UserMenu({ onDropdownChange }) {
+interface UserMenuProps {
+  onDropdownChange?: (isOpen: boolean) => void;
+}
+
+export default function UserMenu({ onDropdownChange }: UserMenuProps) {
   const { user, isAuthenticated, isAdmin, signOut } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const dropdownRef = useRef(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
   // Close dropdown when clicking outside
   useEffect(() => {
-    function handleClickOutside(event) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsDropdownOpen(false);
       }
     }
@@ -55,9 +60,9 @@ export default function UserMenu({ onDropdownChange }) {
     navigate('/signup');
   };
 
-  const getInitials = () => {
-    if (!user?.email) return '?';
-    return user.email.substring(0, 2).toUpperCase();
+  const getInitials = (u: User | null): string => {
+    if (!u?.email) return '?';
+    return u.email.substring(0, 2).toUpperCase();
   };
 
   return (
@@ -70,7 +75,7 @@ export default function UserMenu({ onDropdownChange }) {
           aria-expanded={isDropdownOpen}
         >
           <div className="user-avatar">
-            {isAuthenticated ? getInitials() : '👤'}
+            {isAuthenticated ? getInitials(user) : '👤'}
           </div>
         </button>
 
@@ -144,14 +149,8 @@ export default function UserMenu({ onDropdownChange }) {
         onClose={() => setIsLoginModalOpen(false)}
         onSuccess={() => {
           setIsLoginModalOpen(false);
-          // Page doesn't refresh, just close modal
         }}
       />
     </>
   );
 }
-
-
-
-
-

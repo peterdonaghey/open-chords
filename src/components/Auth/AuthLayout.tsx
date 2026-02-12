@@ -2,9 +2,14 @@
  * AuthLayout - Shared layout for authentication pages
  */
 import { useNavigate } from 'react-router-dom';
+import type { ReactNode } from 'react';
 import './Auth.css';
 
-export default function AuthLayout({ children }) {
+interface AuthLayoutProps {
+  children: ReactNode;
+}
+
+export default function AuthLayout({ children }: AuthLayoutProps) {
   const navigate = useNavigate();
 
   return (
@@ -18,4 +23,3 @@ export default function AuthLayout({ children }) {
     </div>
   );
 }
-

@@ -7,6 +7,10 @@ import { useAuth } from '../../context/AuthContext';
 import AuthLayout from './AuthLayout';
 import './Auth.css';
 
+interface LocationState {
+  from?: { pathname: string };
+}
+
 export default function LoginForm() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -17,9 +21,9 @@ export default function LoginForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const from = location.state?.from?.pathname || '/songs';
+  const from = (location.state as LocationState | null)?.from?.pathname ?? '/songs';
 
-  async function handleSubmit(e) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
 
@@ -34,7 +38,7 @@ export default function LoginForm() {
       navigate(from, { replace: true });
     } catch (err) {
       console.error('Login error:', err);
-      setError(err.message || 'Failed to sign in. Please try again.');
+      setError(err instanceof Error ? err.message : 'Failed to sign in. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -96,4 +100,3 @@ export default function LoginForm() {
     </AuthLayout>
   );
 }
-

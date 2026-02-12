@@ -11,7 +11,7 @@ import './ProfilePage.css';
 export default function ProfilePage() {
   const navigate = useNavigate();
   const { user, isAuthenticated, isLoading } = useAuth();
-  
+
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -28,12 +28,11 @@ export default function ProfilePage() {
     return null;
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess('');
 
-    // Validation
     if (!currentPassword || !newPassword || !confirmPassword) {
       setError('All fields are required');
       return;
@@ -58,27 +57,28 @@ export default function ProfilePage() {
       setLoading(true);
       await changePassword(currentPassword, newPassword);
       setSuccess('Password changed successfully!');
-      
-      // Clear form
+
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
     } catch (err) {
       console.error('Change password error:', err);
-      setError(err.message || 'Failed to change password');
+      setError(err instanceof Error ? err.message : 'Failed to change password');
     } finally {
       setLoading(false);
     }
   };
 
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: string | undefined) => {
     if (!dateString) return 'Unknown';
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     });
   };
+
+  if (!user) return null;
 
   return (
     <div className="profile-page">
@@ -95,7 +95,6 @@ export default function ProfilePage() {
         <div className="profile-container">
           <h2>My Profile</h2>
 
-          {/* User Information */}
           <section className="profile-info">
             <h3>Account Information</h3>
             <div className="info-grid">
@@ -109,7 +108,7 @@ export default function ProfilePage() {
               </div>
               <div className="info-item">
                 <label>Role</label>
-                <p className="role-badge">{user.role}</p>
+                <p className="role-badge">{user.role ?? 'user'}</p>
               </div>
               {user.createdAt && (
                 <div className="info-item">
@@ -120,10 +119,9 @@ export default function ProfilePage() {
             </div>
           </section>
 
-          {/* Change Password */}
           <section className="change-password">
             <h3>Change Password</h3>
-            
+
             <form onSubmit={handleSubmit} className="password-form">
               {error && <div className="error-message">{error}</div>}
               {success && <div className="success-message">{success}</div>}
@@ -166,8 +164,8 @@ export default function ProfilePage() {
                 />
               </div>
 
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="btn-primary"
                 disabled={loading}
               >
@@ -177,8 +175,8 @@ export default function ProfilePage() {
           </section>
 
           <div className="profile-actions">
-            <button 
-              className="btn-secondary" 
+            <button
+              className="btn-secondary"
               onClick={() => navigate('/songs')}
             >
               Back to Songs
@@ -189,4 +187,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-

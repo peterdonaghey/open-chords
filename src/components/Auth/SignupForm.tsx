@@ -7,6 +7,17 @@ import { useAuth } from '../../context/AuthContext';
 import AuthLayout from './AuthLayout';
 import './Auth.css';
 
+type PasswordStrength = 'weak' | 'medium' | 'strong' | null;
+
+function getPasswordStrength(password: string): PasswordStrength {
+  if (!password) return null;
+  if (password.length < 8) return 'weak';
+  if (password.length < 12 || !/\d/.test(password) || !/[A-Z]/.test(password)) {
+    return 'medium';
+  }
+  return 'strong';
+}
+
 export default function SignupForm() {
   const navigate = useNavigate();
   const { signUp } = useAuth();
@@ -17,22 +28,12 @@ export default function SignupForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  function getPasswordStrength(password) {
-    if (!password) return null;
-    if (password.length < 8) return 'weak';
-    if (password.length < 12 || !/\d/.test(password) || !/[A-Z]/.test(password)) {
-      return 'medium';
-    }
-    return 'strong';
-  }
-
   const passwordStrength = getPasswordStrength(password);
 
-  async function handleSubmit(e) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
 
-    // Validation
     if (!email || !password || !confirmPassword) {
       setError('Please fill in all fields');
       return;
@@ -61,14 +62,14 @@ export default function SignupForm() {
     try {
       setLoading(true);
       await signUp(email, password);
-      // Custom auth logs user in immediately, no email verification needed
       navigate('/');
     } catch (err) {
       console.error('Signup error:', err);
-      if (err.message.includes('already exists')) {
+      const msg = err instanceof Error ? err.message : '';
+      if (msg.includes('already exists')) {
         setError('An account with this email already exists');
       } else {
-        setError(err.message || 'Failed to create account. Please try again.');
+        setError(msg || 'Failed to create account. Please try again.');
       }
     } finally {
       setLoading(false);
@@ -145,4 +146,3 @@ export default function SignupForm() {
     </AuthLayout>
   );
 }
-

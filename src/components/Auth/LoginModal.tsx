@@ -6,17 +6,22 @@ import { createPortal } from 'react-dom';
 import { useAuth } from '../../context/AuthContext';
 import './LoginModal.css';
 
-export default function LoginModal({ isOpen, onClose, onSuccess }) {
+interface LoginModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess?: () => void;
+}
+
+export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalProps) {
   const { signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [showSignup, setShowSignup] = useState(false);
 
   if (!isOpen) return null;
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
@@ -28,19 +33,18 @@ export default function LoginModal({ isOpen, onClose, onSuccess }) {
       onSuccess?.();
       onClose();
     } catch (err) {
-      setError(err.message || 'Failed to sign in');
+      setError(err instanceof Error ? err.message : 'Failed to sign in');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleBackdropClick = (e) => {
+  const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       onClose();
     }
   };
 
-  // Render modal at document root using portal to avoid positioning issues
   return createPortal(
     <div className="modal-overlay" onClick={handleBackdropClick}>
       <div className="modal-content">

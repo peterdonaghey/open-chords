@@ -1,30 +1,25 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
 import UnifiedNavBar from '../../components/layout/UnifiedNavBar';
 import SongEditor from '../../components/song/SongEditor';
 import { createSong } from '../../services/storage';
+import type { Song } from '../../types/song';
 
 /**
  * New Song Page - Create a new song (PUBLIC - allows anonymous)
  */
 export default function NewSongPage() {
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useAuth();
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState(null);
-  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSave = async (songData) => {
+  const handleSave = async (songData: Song) => {
     try {
-      setSaving(true);
       setError(null);
       await createSong(songData);
       navigate(`/song/view/${songData.id}`);
     } catch (err) {
       setError('Failed to save song. Please try again.');
       console.error('Error saving song:', err);
-      setSaving(false);
     }
   };
 
@@ -36,6 +31,7 @@ export default function NewSongPage() {
     <div className="new-song-page">
       <UnifiedNavBar mode="normal" />
       <div className="page-content">
+        {error && <div className="error">{error}</div>}
         <SongEditor onSave={handleSave} onCancel={handleCancel} />
       </div>
     </div>
