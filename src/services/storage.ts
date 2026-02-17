@@ -50,7 +50,11 @@ export async function syncSongs(): Promise<Song[]> {
     throw new Error(`Failed to fetch songs: ${response.statusText}`);
   }
   const songs = await response.json();
-  await saveSongsList(songs);
+  try {
+    await saveSongsList(songs);
+  } catch (e) {
+    console.warn('Cache save failed:', e);
+  }
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent(SONGS_SYNCED_EVENT));
   }
@@ -73,23 +77,34 @@ export async function getAllSongs(): Promise<Song[]> {
         throw new Error(`Failed to fetch songs: ${response.statusText}`);
       }
       const songs = await response.json();
-      await saveSongsList(songs);
+      try {
+        await saveSongsList(songs);
+      } catch (e) {
+        console.warn('Cache save failed:', e);
+      }
       return songs;
     } catch (error) {
-      const cached = await getSongsListFromCache();
-      if (cached && cached.length > 0) {
-        return cached;
+      try {
+        const cached = await getSongsListFromCache();
+        if (cached && cached.length > 0) return cached;
+      } catch {
+        /* cache read failed */
       }
       console.error('Error fetching songs:', error);
       throw error;
     }
   }
 
-  const cached = await getSongsListFromCache();
-  if (!cached) {
+  try {
+    const cached = await getSongsListFromCache();
+    if (!cached || cached.length === 0) {
+      throw new Error('Offline: no cached songs. Connect to the internet to load songs.');
+    }
+    return cached;
+  } catch (e) {
+    if (e instanceof Error && e.message.startsWith('Offline:')) throw e;
     throw new Error('Offline: no cached songs. Connect to the internet to load songs.');
   }
-  return cached;
 }
 
 export async function getSong(id: string): Promise<Song | null> {
@@ -103,21 +118,34 @@ export async function getSong(id: string): Promise<Song | null> {
         throw new Error(`Failed to fetch song: ${response.statusText}`);
       }
       const song = await response.json();
-      await cacheSong(song);
+      try {
+        await cacheSong(song);
+      } catch (e) {
+        console.warn('Cache save failed:', e);
+      }
       return song;
     } catch (error) {
-      const cached = await getSongFromCache(id);
-      if (cached) return cached;
+      try {
+        const cached = await getSongFromCache(id);
+        if (cached) return cached;
+      } catch {
+        /* cache read failed */
+      }
       console.error('Error fetching song:', error);
       throw error;
     }
   }
 
-  const cached = await getSongFromCache(id);
-  if (!cached) {
+  try {
+    const cached = await getSongFromCache(id);
+    if (!cached) {
+      throw new Error(`Offline: song not in cache. Connect to the internet to load it.`);
+    }
+    return cached;
+  } catch (e) {
+    if (e instanceof Error && e.message.startsWith('Offline:')) throw e;
     throw new Error(`Offline: song not in cache. Connect to the internet to load it.`);
   }
-  return cached;
 }
 
 export async function createSong(song: Song): Promise<Song> {

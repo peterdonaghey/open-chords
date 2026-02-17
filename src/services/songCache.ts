@@ -12,7 +12,14 @@ const STORE_META = 'meta';
 const META_LIST = 'songsList';
 const META_TIMESTAMP = 'listTimestamp';
 
+function isIndexedDBAvailable(): boolean {
+  return typeof indexedDB !== 'undefined';
+}
+
 function openDb(): Promise<IDBDatabase> {
+  if (!isIndexedDBAvailable()) {
+    return Promise.reject(new Error('IndexedDB not available'));
+  }
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
     request.onerror = () => reject(request.error);
@@ -30,6 +37,7 @@ function openDb(): Promise<IDBDatabase> {
 }
 
 export async function saveSongsList(songs: Song[]): Promise<void> {
+  if (!isIndexedDBAvailable()) return;
   const db = await openDb();
   return new Promise((resolve, reject) => {
     const tx = db.transaction([STORE_SONGS, STORE_META], 'readwrite');
@@ -52,6 +60,7 @@ export async function saveSongsList(songs: Song[]): Promise<void> {
 }
 
 export async function getSongsListFromCache(): Promise<Song[] | null> {
+  if (!isIndexedDBAvailable()) return null;
   const db = await openDb();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_META, 'readonly');
@@ -68,6 +77,7 @@ export async function getSongsListFromCache(): Promise<Song[] | null> {
 }
 
 export async function saveSong(song: Song): Promise<void> {
+  if (!isIndexedDBAvailable()) return;
   const db = await openDb();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_SONGS, 'readwrite');
@@ -84,6 +94,7 @@ export async function saveSong(song: Song): Promise<void> {
 }
 
 export async function getSongFromCache(id: string): Promise<Song | null> {
+  if (!isIndexedDBAvailable()) return null;
   const db = await openDb();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_SONGS, 'readonly');
@@ -100,6 +111,7 @@ export async function getSongFromCache(id: string): Promise<Song | null> {
 }
 
 export function getCacheTimestamp(): Promise<string | null> {
+  if (!isIndexedDBAvailable()) return Promise.resolve(null);
   return openDb().then(
     (db) =>
       new Promise((resolve, reject) => {
