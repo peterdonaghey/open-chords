@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useOffline } from '../../context/OfflineContext';
 import './SongList.css';
 import type { Song } from '../../types/song';
 import type { User } from '../../types/auth';
@@ -16,6 +17,7 @@ interface SongListProps {
  */
 function SongList({ songs, onSelectSong, onNewSong, onDeleteSong }: SongListProps) {
   const { user, isAuthenticated, isAdmin } = useAuth();
+  const { isOnline } = useOffline();
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredSongs, setFilteredSongs] = useState<Song[]>(songs);
   const [sortBy, setSortBy] = useState<'title' | 'artist' | 'updatedAt'>('title');
@@ -60,9 +62,11 @@ function SongList({ songs, onSelectSong, onNewSong, onDeleteSong }: SongListProp
     <div className="song-list">
       <div className="song-list-header">
         <h2>Song Library</h2>
-        <button className="btn-new-song" onClick={onNewSong}>
-          + New Song
-        </button>
+        {isOnline && (
+          <button className="btn-new-song" onClick={onNewSong}>
+            + New Song
+          </button>
+        )}
       </div>
 
       <div className="song-list-controls">
@@ -101,7 +105,7 @@ function SongList({ songs, onSelectSong, onNewSong, onDeleteSong }: SongListProp
 
       {sortBy === 'artist' && groupedSongs ? (
         <div className="song-list-grouped">
-          {Object.entries(groupedSongs).map(([artist, artistSongs]) => (
+                {Object.entries(groupedSongs).map(([artist, artistSongs]) => (
             <div key={artist} className="artist-group">
               <h3 className="artist-name">{artist}</h3>
               <div className="artist-songs">
@@ -114,6 +118,7 @@ function SongList({ songs, onSelectSong, onNewSong, onDeleteSong }: SongListProp
                     currentUser={user}
                     isAuthenticated={isAuthenticated}
                     isAdmin={isAdmin}
+                    canEdit={isOnline}
                   />
                 ))}
               </div>
@@ -131,6 +136,7 @@ function SongList({ songs, onSelectSong, onNewSong, onDeleteSong }: SongListProp
               currentUser={user}
               isAuthenticated={isAuthenticated}
               isAdmin={isAdmin}
+              canEdit={isOnline}
             />
           ))}
         </div>
@@ -146,13 +152,14 @@ interface SongCardProps {
   currentUser: User | null;
   isAuthenticated: boolean;
   isAdmin: boolean;
+  canEdit: boolean;
 }
 
-function SongCard({ song, onSelect, onDelete, currentUser, isAuthenticated, isAdmin }: SongCardProps) {
+function SongCard({ song, onSelect, onDelete, currentUser, isAuthenticated, isAdmin, canEdit }: SongCardProps) {
   const [showMenu, setShowMenu] = useState(false);
 
   const isOwner = isAuthenticated && currentUser && song.userId === currentUser.userId;
-  const canDelete = isOwner || isAdmin;
+  const canDelete = canEdit && (isOwner || isAdmin);
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();

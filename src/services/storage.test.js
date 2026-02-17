@@ -14,6 +14,14 @@ vi.mock('./auth', () => ({
   getIdToken: vi.fn(async () => 'mock-jwt-token'),
 }));
 
+// Mock songCache - no-op in tests (IndexedDB not available in jsdom)
+vi.mock('./songCache', () => ({
+  saveSongsList: vi.fn(async () => {}),
+  getSongsListFromCache: vi.fn(async () => null),
+  saveSong: vi.fn(async () => {}),
+  getSongFromCache: vi.fn(async () => null),
+}));
+
 // Setup MSW server
 const server = setupServer(...handlers);
 

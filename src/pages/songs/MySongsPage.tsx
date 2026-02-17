@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import UnifiedNavBar from '../../components/layout/UnifiedNavBar';
 import SongList from '../../components/song/SongList';
-import { getAllSongs, deleteSong } from '../../services/storage';
+import { getAllSongs, deleteSong, SONGS_SYNCED_EVENT } from '../../services/storage';
 import type { Song } from '../../types/song';
 
 /**
@@ -15,16 +15,6 @@ export default function MySongsPage() {
   const [songs, setSongs] = useState<Song[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      navigate('/login');
-      return;
-    }
-    if (isAuthenticated) {
-      loadSongs();
-    }
-  }, [isAuthenticated, isLoading, navigate]);
 
   const loadSongs = async () => {
     try {
@@ -42,6 +32,27 @@ export default function MySongsPage() {
       setLoading(false);
     }
   };
+
+  const loadSongsRef = useRef(loadSongs);
+  loadSongsRef.current = loadSongs;
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+    if (isAuthenticated) {
+      loadSongs();
+    }
+  }, [isAuthenticated, isLoading, navigate]);
+
+  useEffect(() => {
+    const handleSync = () => {
+      if (isAuthenticated && user) loadSongsRef.current();
+    };
+    window.addEventListener(SONGS_SYNCED_EVENT, handleSync);
+    return () => window.removeEventListener(SONGS_SYNCED_EVENT, handleSync);
+  }, [isAuthenticated, user]);
 
   const handleSelectSong = (song: Song) => {
     navigate(`/song/view/${song.id}`);

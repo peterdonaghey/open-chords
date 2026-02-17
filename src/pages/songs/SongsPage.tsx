@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UnifiedNavBar from '../../components/layout/UnifiedNavBar';
 import SongList from '../../components/song/SongList';
-import { getAllSongs, deleteSong } from '../../services/storage';
+import { getAllSongs, deleteSong, SONGS_SYNCED_EVENT } from '../../services/storage';
 import type { Song } from '../../types/song';
 
 /**
@@ -16,6 +16,12 @@ export default function SongsPage() {
 
   useEffect(() => {
     loadSongs();
+  }, []);
+
+  useEffect(() => {
+    const handleSync = () => loadSongs();
+    window.addEventListener(SONGS_SYNCED_EVENT, handleSync);
+    return () => window.removeEventListener(SONGS_SYNCED_EVENT, handleSync);
   }, []);
 
   const loadSongs = async () => {

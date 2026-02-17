@@ -1,6 +1,7 @@
 import { render } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from '../../context/AuthContext';
+import { OfflineProvider } from '../../context/OfflineContext';
 
 /**
  * Custom render function that wraps components with necessary providers
@@ -18,9 +19,11 @@ export function renderWithProviders(ui, options = {}) {
   function Wrapper({ children }) {
     return (
       <BrowserRouter>
-        <AuthProvider {...authProviderProps}>
-          {children}
-        </AuthProvider>
+        <OfflineProvider>
+          <AuthProvider {...authProviderProps}>
+            {children}
+          </AuthProvider>
+        </OfflineProvider>
       </BrowserRouter>
     );
   }

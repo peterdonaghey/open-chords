@@ -1,12 +1,26 @@
 /**
  * Storage Service - Handles song persistence via API
- * Always uses production DynamoDB - no localStorage, single source of truth
+ * Caches to IndexedDB when online, serves from cache when offline
+ * Auto-syncs when connection restored
  */
 
 import { getIdToken } from './auth';
+import {
+  saveSongsList,
+  getSongsListFromCache,
+  saveSong as cacheSong,
+  getSongFromCache,
+} from './songCache';
 import type { Song } from '../types/song';
 
 const API_BASE = import.meta.env.DEV ? 'https://open-chords.org/api' : '/api';
+
+/** Custom event dispatched when songs are synced from API (e.g. after coming back online) */
+export const SONGS_SYNCED_EVENT = 'open-chords:songs-synced';
+
+function isOnline(): boolean {
+  return typeof navigator !== 'undefined' && navigator.onLine;
+}
 
 async function getAuthHeaders(): Promise<Record<string, string>> {
   try {
@@ -29,35 +43,81 @@ function handleResponse(response: Response): Response {
   return response;
 }
 
-export async function getAllSongs(): Promise<Song[]> {
-  try {
-    const response = await fetch(`${API_BASE}/songs`);
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch songs: ${response.statusText}`);
-    }
-    return await response.json();
-  } catch (error) {
-    console.error('Error fetching songs:', error);
-    throw error;
+/** Sync songs from API to cache and dispatch SONGS_SYNCED_EVENT for UI refresh */
+export async function syncSongs(): Promise<Song[]> {
+  const response = await fetch(`${API_BASE}/songs`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch songs: ${response.statusText}`);
   }
+  const songs = await response.json();
+  await saveSongsList(songs);
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent(SONGS_SYNCED_EVENT));
+  }
+  return songs;
+}
+
+function initOnlineSync(): void {
+  if (typeof window === 'undefined') return;
+  window.addEventListener('online', () => {
+    syncSongs().catch((err) => console.error('Auto-sync failed:', err));
+  });
+}
+initOnlineSync();
+
+export async function getAllSongs(): Promise<Song[]> {
+  if (isOnline()) {
+    try {
+      const response = await fetch(`${API_BASE}/songs`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch songs: ${response.statusText}`);
+      }
+      const songs = await response.json();
+      await saveSongsList(songs);
+      return songs;
+    } catch (error) {
+      const cached = await getSongsListFromCache();
+      if (cached && cached.length > 0) {
+        return cached;
+      }
+      console.error('Error fetching songs:', error);
+      throw error;
+    }
+  }
+
+  const cached = await getSongsListFromCache();
+  if (!cached) {
+    throw new Error('Offline: no cached songs. Connect to the internet to load songs.');
+  }
+  return cached;
 }
 
 export async function getSong(id: string): Promise<Song | null> {
-  try {
-    const response = await fetch(`${API_BASE}/songs/${id}`);
-
-    if (response.status === 404) {
-      return null;
+  if (isOnline()) {
+    try {
+      const response = await fetch(`${API_BASE}/songs/${id}`);
+      if (response.status === 404) {
+        return null;
+      }
+      if (!response.ok) {
+        throw new Error(`Failed to fetch song: ${response.statusText}`);
+      }
+      const song = await response.json();
+      await cacheSong(song);
+      return song;
+    } catch (error) {
+      const cached = await getSongFromCache(id);
+      if (cached) return cached;
+      console.error('Error fetching song:', error);
+      throw error;
     }
-    if (!response.ok) {
-      throw new Error(`Failed to fetch song: ${response.statusText}`);
-    }
-    return await response.json();
-  } catch (error) {
-    console.error('Error fetching song:', error);
-    throw error;
   }
+
+  const cached = await getSongFromCache(id);
+  if (!cached) {
+    throw new Error(`Offline: song not in cache. Connect to the internet to load it.`);
+  }
+  return cached;
 }
 
 export async function createSong(song: Song): Promise<Song> {

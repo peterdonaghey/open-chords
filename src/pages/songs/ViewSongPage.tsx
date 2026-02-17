@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useOffline } from '../../context/OfflineContext';
 import UnifiedNavBar from '../../components/layout/UnifiedNavBar';
 import SongViewer from '../../components/song/SongViewer';
 import { getSong } from '../../services/storage';
@@ -13,6 +14,7 @@ import type { Song } from '../../types/song';
 export default function ViewSongPage() {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
+  const { isOnline } = useOffline();
   const [song, setSong] = useState<Song | null>(null);
   const [transposedContent, setTransposedContent] = useState('');
   const [currentTranspose, setCurrentTranspose] = useState(0);
@@ -182,7 +184,7 @@ export default function ViewSongPage() {
         transpose={currentTranspose}
         onTranspose={handleTranspose}
         onDoubleColumnToggle={() => setIsDoubleColumn(prev => !prev)}
-        onEdit={handleEdit}
+        onEdit={isOnline ? handleEdit : undefined}
         user={user}
         isAuthenticated={isAuthenticated}
         songOwnerId={song?.userId}
