@@ -2,7 +2,7 @@
  * WelcomePage - Landing page for non-authenticated users
  */
 import { Link } from 'react-router-dom';
-import './Auth/Auth.css';
+import '../auth/Auth.css';
 
 export default function WelcomePage() {
   return (
