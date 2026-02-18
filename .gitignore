@@ -41,3 +41,6 @@ logs/
 # AWS
 s3-cors.json
 .env.vercel.temp
+
+playwright-report/
+test-results/
